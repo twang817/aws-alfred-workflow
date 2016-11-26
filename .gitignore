@@ -105,3 +105,29 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# vendored
+/Alfred_Workflow-1.24.dist-info/
+/Jinja2-2.8.dist-info/
+/MarkupSafe-0.23.dist-info/
+/boto3-1.4.1.dist-info/
+/boto3/
+/botocore-1.4.78.dist-info/
+/botocore/
+/click-6.6.dist-info/
+/click/
+/concurrent/
+/dateutil/
+/docutils-0.12.dist-info/
+/docutils/
+/futures-3.0.5.dist-info/
+/jinja2/
+/jmespath-0.9.0.dist-info/
+/jmespath/
+/markupsafe/
+/python_dateutil-2.6.0.dist-info/
+/s3transfer-0.1.9.dist-info/
+/s3transfer/
+/six-1.10.0.dist-info/
+/six.py
+/workflow/
