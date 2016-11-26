@@ -1,0 +1,61 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>State:</td>
+            <td>{{ instance.State.Name }}</td>
+        </tr>
+        <tr>
+            <td>Instance Type:</td>
+            <td>{{ instance.InstanceType }}</td>
+        </tr>
+        <tr>
+            <td>Launch Time:</td>
+            <td>{{ instance.LaunchTime }}</td>
+        </tr>
+        <tr>
+            <td>VPC ID:</td>
+            <td>{{ instance.VpcId }}</td>
+        </tr>
+        <tr>
+            <td>Subnet ID:</td>
+            <td>{{ instance.SubnetId }}</td>
+        </tr>
+        <tr>
+            <td>Placement:</td>
+            <td>{{ instance.Placement.AvailabilityZone }}</td>
+        </tr>
+        <tr>
+            <td>Private IP:</td>
+            <td>{{ instance.PrivateIpAddress }}</td>
+        </tr>
+        <tr>
+            <td>Private DNS:</td>
+            <td>{{ instance.PrivateDnsName }}</td>
+        </tr>
+        <tr>
+            <td>Public IP:</td>
+            <td>{{ instance.PublicIpAddress }}</td>
+        </tr>
+        <tr>
+            <td>Public DNS:</td>
+            <td>{{ instance.PublicDnsName }}</td>
+        </tr>
+        <tr>
+            <td>Tags:</td>
+            <td>
+                <dl>
+                    {% for tag in instance.Tags %}
+                    <dt>{{ tag.Key }}</dt>
+                    <dd>{{ tag.Value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

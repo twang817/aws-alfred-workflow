@@ -1,0 +1,4 @@
+jinja2
+Alfred-Workflow
+boto3
+click
