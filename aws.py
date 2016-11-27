@@ -87,14 +87,17 @@ def find_ec2(wf, profile, query, quicklook_baseurl):
             title = instance['InstanceId']
         uid = '%s-ec2-%s' % (profile, instance['InstanceId'])
         valid = instance['State']['Name'] == 'running'
-        quicklookurl = '%s/ec2?%s' % (quicklook_baseurl, urlencode({
-            'template': 'ec2',
-            'context': json.dumps({
-                'title': title,
-                'uid': uid,
-                'instance': instance,
-            }, default=json_serializer)
-        }))
+        if quicklook_baseurl is not None:
+            quicklookurl = '%s/ec2?%s' % (quicklook_baseurl, urlencode({
+                'template': 'ec2',
+                'context': json.dumps({
+                    'title': title,
+                    'uid': uid,
+                    'instance': instance,
+                }, default=json_serializer)
+            }))
+        else:
+            quicklookurl = None
 
         item = wf.add_item(
             title,
