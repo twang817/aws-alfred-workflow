@@ -390,6 +390,13 @@
 			<integer>30</integer>
 		</dict>
 	</dict>
+	<key>variables</key>
+	<dict>
+		<key>WF_QUICKLOOK_PORT</key>
+		<string>8888</string>
+	</dict>
+	<key>version</key>
+	<string></string>
 	<key>webaddress</key>
 	<string>https://github.com/twang817/aws-alfred-workflow</string>
 </dict>
