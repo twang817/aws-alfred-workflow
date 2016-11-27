@@ -108,7 +108,7 @@ def find_ec2(wf, profile, query, quicklook_baseurl):
         )
         item.setvar('title', title)
         item.add_modifier(
-            "shift",
+            "alt",
             subtitle='public ip',
             arg=instance.get('PublicIpAddress', 'N/A'),
             valid=valid and 'PublicIpAddress' in instance,

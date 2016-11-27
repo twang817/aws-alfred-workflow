@@ -33,6 +33,15 @@ aws_access_key_id = xxxxxxxxxxxxxxxxxxxxx
 aws_secret_access_key = xxxxxxxxxxxxxxxxxxxxx
 ```
 
+Configuration
+=============
+In Alfred Preferences, choose the AWS workflow and click the `[x]` icon to
+configure the `WF_QUICKLOOK_PORT` environment variable.
+
+![config_demo](https://raw.githubusercontent.com/twang817/aws-alfred-workflow/master/docs/config_env.png)
+
+If not configured, quicklook will be disabled.
+
 Usage
 =====
 
@@ -45,5 +54,24 @@ Now, you can search your EC2 instances via:
 `aws <query>`
 
 * Select an instance to copy the private IP address to your clipboard.
-* Hold `SHIFT` to copy public IP address to your clipboard.
-* Hold `CMD` to open AWS web console to that instance.
+* Hold `alt` to copy public IP address to your clipboard.
+* Hold `cmd` to open AWS web console to that instance.
+* Press `shift` (or ⌘Y) to open quicklook to view instance details
+
+You can also open your browser to the AWS Web Console using the `awsweb`
+command:
+
+`awsweb cloudformation`
+
+Changelog
+=========
+## v1.1 - 2016-11-27
+### Added
+- added awsweb command (stolen from https://github.com/rkoval/alfred-aws-console-services-workflow)
+- added quicklook server
+- changed public IP binding to `alt` to not conflict with quicklook
+
+
+Contributors
+============
+* [rkoval](https://github.com/rkoval)
