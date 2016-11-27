@@ -65,21 +65,21 @@ Now, you can search your EC2 instances via:
 
 ### Search query
 
-The search query, by default, will search only `InstanceId`s if the query begins
-with `i-` and consists of only 1 term.  When searching `InstanceId`s the query
+The search query, by default, will search only `InstanceIds` if the query begins
+with `i-` and consists of only 1 term.  When searching `InstanceIds` the query
 must be an exact prefix match.
 
 If the query does not begin with `i-`, the search will be performed using a
-fuzzy match against the name of the instance (via the Name tag).
+fuzzy match against the name of the instance (via the `Name` tag).
 
-You can also additional filter your results by specifying additional tags in the
-form of `tag:value`.  For example, if I have an EC2 instances with a `Role` tag
-of `webserver`, I can use the query: `role:web` to find all instances that have
-`web` in the `Role` tag.  Note, that tag names are case insensitive.
+You can also search by other tags by specifying the tag in the form of
+`tag:value`.  For example, if I have an EC2 instances with a `Role` tag of
+`webserver`, I can use the query: `role:web` to find all instances that have
+`webserver` in the `Role` tag.  Note, that tag names are case insensitive.
 
 Additionally, you can combine multiple search terms.  For example, the query:
-`role:web application:test my te app` might find an EC2 instance named
-`my-test-application` with a `Role` tag of `webserver` and a `Application` tag
+`role:web environment:test my te app` might find an EC2 instance named
+`my-test-application` with a `Role` tag of `webserver` and a `Environment` tag
 of `integration-testing`.
 
 
