@@ -45,10 +45,15 @@ If not configured, quicklook will be disabled.
 Usage
 =====
 
+Select AWS Profile
+------------------
 Select the AWS profile to use via:
 
 `awsprofile <profile name>`
 
+
+Searching for Instances
+-----------------------
 Now, you can search your EC2 instances via:
 
 `aws <query>`
@@ -58,10 +63,14 @@ Now, you can search your EC2 instances via:
 * Hold `cmd` to open AWS web console to that instance.
 * Press `shift` (or ⌘Y) to open quicklook to view instance details
 
+Open AWS Web Console
+--------------------
 You can also open your browser to the AWS Web Console using the `awsweb`
 command:
 
-`awsweb cloudformation`
+`awsweb <query>`
+
+See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for demo.
 
 Changelog
 =========
