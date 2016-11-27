@@ -74,10 +74,15 @@ See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for d
 
 Changelog
 =========
+## v1.1.1 - 2016-11-27
+### Fixed
+- bug where quicklook was not disabled if port was not configured
+
 ## v1.1 - 2016-11-27
 ### Added
 - added awsweb command (stolen from https://github.com/rkoval/alfred-aws-console-services-workflow)
 - added quicklook server
+### Changed
 - changed public IP binding to `alt` to not conflict with quicklook
 
 
