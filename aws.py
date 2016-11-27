@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import sys
 
 from six.moves import configparser
@@ -42,9 +43,11 @@ def get_ec2_instances():
         response = client.describe_instances(MaxResults=1000, **next_token)
         for reservation in response['Reservations']:
             for instance in reservation['Instances']:
+                instance['facets'] = {}
                 if 'Tags' in instance:
                     for tag in instance['Tags']:
                         instance['Tag:%s' % tag['Key']] = tag['Value']
+                        instance['facets'][tag['Key'].lower()] = tag['Value']
                 instances.append(instance)
         if 'NextToken' in response:
             next_token['NextToken'] = response['NextToken']
@@ -66,21 +69,34 @@ def dedupe(lofd, key):
 def find_ec2(wf, profile, query, quicklook_baseurl):
     instances = wf.cached_data('%s-ec2' % profile, get_ec2_instances, max_age=600)
 
+    facets = {}
+    terms = []
     if query:
-        matched = wf.filter(query, instances, key=lambda i: unicode(i['InstanceId']), match_on=MATCH_STARTSWITH)
-        matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Name', u''))
-        # TODO: parse query for facet:query to perform faceted search
-        # matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Application', u''))
-        # matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Role', u''))
-        # matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Vertical', u''))
-        # matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Vpc', u''))
-        # matched += wf.filter(query, instances, key=lambda i: i.get('Tag:Environment', u''))
-    else:
-        matched = instances
+        atoms = re.findall(r'(?:[^\s,"]|"(?:\\.|[^"])*")+', query)
+        for atom in atoms:
+            if ':' in atom:
+                k, v = re.split(''':(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', atom)
+                facets[k] = v.strip("'\"")
+            else:
+                terms.append(atom)
+    log.debug('terms: %s', terms)
+    log.debug('facets: %s', facets)
 
-    matched = dedupe(matched, 'InstanceId')
+    if len(terms) == 1:
+        term = terms[0]
+        if term.startswith('i-'):
+            instances = wf.filter(term, instances, key=lambda i: unicode(i['InstanceId']), match_on=MATCH_STARTSWITH)
+        else:
+            instances = wf.filter(term, instances, key=lambda i: i['facets'].get('name', u''))
+    elif len(terms) > 1:
+        term = ' '.join(terms)
+        instances = wf.filter(term, instances, key=lambda i: i['facets'].get('name', u''))
 
-    for instance in matched:
+    for k, v in facets.items():
+        if v:
+            instances = wf.filter(v, instances, key=lambda i: i['facets'].get(k.lower(), u''))
+
+    for instance in instances:
         if 'Tag:Name' in instance:
             title = '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
         else:
@@ -147,6 +163,13 @@ def list_profiles(wf):
 @pass_wf
 def set_profile(wf, profile):
     wf.settings['profile'] = profile
+
+@cli.command()
+@pass_wf
+def clear_cache(wf):
+    def _filter(n):
+        return not n.endswith('.pid')
+    wf.clear_cache(_filter)
 
 @cli.command()
 @click.option('--quicklook_port', envvar='WF_QUICKLOOK_PORT')

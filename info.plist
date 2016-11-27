@@ -34,6 +34,19 @@
 				<false/>
 			</dict>
 		</array>
+		<key>A60E5E03-89A7-4B5B-B23C-830E60C4C902</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>5A23B1F5-8B0C-4D38-A0A6-5A25A5973868</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>A644EB6D-C2F7-40CD-94A1-AE80FA78A7DC</key>
 		<array>
 			<dict>
@@ -203,6 +216,50 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>python aws.py clear_cache</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>5A23B1F5-8B0C-4D38-A0A6-5A25A5973868</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>awsclearcache</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>Clears cache</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>A60E5E03-89A7-4B5B-B23C-830E60C4C902</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>lastpathcomponent</key>
 				<false/>
 				<key>onlyshowifquerypopulated</key>
@@ -361,6 +418,13 @@
 			<key>ypos</key>
 			<integer>180</integer>
 		</dict>
+		<key>5A23B1F5-8B0C-4D38-A0A6-5A25A5973868</key>
+		<dict>
+			<key>xpos</key>
+			<integer>860</integer>
+			<key>ypos</key>
+			<integer>180</integer>
+		</dict>
 		<key>74371D05-1285-43DD-B514-B78F9200DD7B</key>
 		<dict>
 			<key>xpos</key>
@@ -374,6 +438,13 @@
 			<integer>370</integer>
 			<key>ypos</key>
 			<integer>430</integer>
+		</dict>
+		<key>A60E5E03-89A7-4B5B-B23C-830E60C4C902</key>
+		<dict>
+			<key>xpos</key>
+			<integer>630</integer>
+			<key>ypos</key>
+			<integer>180</integer>
 		</dict>
 		<key>A644EB6D-C2F7-40CD-94A1-AE80FA78A7DC</key>
 		<dict>

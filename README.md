@@ -63,6 +63,26 @@ Now, you can search your EC2 instances via:
 * Hold `cmd` to open AWS web console to that instance.
 * Press `shift` (or ⌘Y) to open quicklook to view instance details
 
+### Search query
+
+The search query, by default, will search only `InstanceId`s if the query begins
+with `i-` and consists of only 1 term.  When searching `InstanceId`s the query
+must be an exact prefix match.
+
+If the query does not begin with `i-`, the search will be performed using a
+fuzzy match against the name of the instance (via the Name tag).
+
+You can also additional filter your results by specifying additional tags in the
+form of `tag:value`.  For example, if I have an EC2 instances with a `Role` tag
+of `webserver`, I can use the query: `role:web` to find all instances that have
+`web` in the `Role` tag.  Note, that tag names are case insensitive.
+
+Additionally, you can combine multiple search terms.  For example, the query:
+`role:web application:test my te app` might find an EC2 instance named
+`my-test-application` with a `Role` tag of `webserver` and a `Application` tag
+of `integration-testing`.
+
+
 Open AWS Web Console
 --------------------
 You can also open your browser to the AWS Web Console using the `awsweb`
@@ -74,6 +94,11 @@ See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for d
 
 Changelog
 =========
+
+## v2.0.0 - 2016-11-27
+
+### Added
+- faceted searching
 
 ## v1.1.1 - 2016-11-27
 
