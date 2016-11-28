@@ -8,7 +8,9 @@ from six.moves import configparser
 from six.moves.urllib.parse import urlencode
 
 import boto3
+import botocore
 import click
+import concurrent.futures
 from workflow import Workflow3
 from workflow import (
     MATCH_ALL,
@@ -56,45 +58,49 @@ def get_ec2_instances():
     return instances
 
 
-def dedupe(lofd, key):
-    seen = set()
-    res = []
-    for d in lofd:
-        if d[key] not in seen:
-            seen.add(d[key])
-            res.append(d)
-    return res
-
-
-def find_ec2(wf, profile, query, quicklook_baseurl):
-    instances = wf.cached_data('%s-ec2' % profile, get_ec2_instances, max_age=600)
-
-    facets = {}
-    terms = []
-    if query:
-        atoms = re.findall(r'(?:[^\s,"]|"(?:\\.|[^"])*")+', query)
-        for atom in atoms:
-            if ':' in atom:
-                k, v = re.split(''':(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', atom)
-                facets[k] = v.strip("'\"")
+def get_s3_buckets():
+    client = boto3.client('s3')
+    buckets = []
+    log.debug('calling list_buckets')
+    response = client.list_buckets()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(client.get_bucket_tagging, Bucket=bucket['Name']): bucket for bucket in response['Buckets']}
+        for future in concurrent.futures.as_completed(futures):
+            bucket = futures[future]
+            bucket['facets'] = {}
+            try:
+                tags = future.result()
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == 'NoSuchTagSet':
+                    continue
+                log.error(e)
             else:
-                terms.append(atom)
-    log.debug('terms: %s', terms)
-    log.debug('facets: %s', facets)
+                for tag in tags.get('TagSet', []):
+                    bucket['facets'][tag['Key'].lower()] = tag['Value']
+            finally:
+                buckets.append(bucket)
+    return buckets
 
-    if len(terms) == 1:
-        term = terms[0]
-        if term.startswith('i-'):
-            instances = wf.filter(term, instances, key=lambda i: unicode(i['InstanceId']), match_on=MATCH_STARTSWITH)
-        else:
-            instances = wf.filter(term, instances, key=lambda i: i['facets'].get('name', u''))
-    elif len(terms) > 1:
-        term = ' '.join(terms)
-        instances = wf.filter(term, instances, key=lambda i: i['facets'].get('name', u''))
 
+QUOTED_TERMS = re.compile(r'(?:[^\s,"]|"(?:\\.|[^"])*")+')
+QUOTED_SPLIT = re.compile(''':(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''')
+
+
+def filter_facets(wf, matches, facets):
     for k, v in facets.items():
         if v:
-            instances = wf.filter(v, instances, key=lambda i: i['facets'].get(k.lower(), u''))
+            matches = wf.filter(v, matches, key=lambda i: i['facets'].get(k.lower(), u''))
+    return matches
+
+
+def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
+    instances = wf.cached_data('%s-ec2' % profile, get_ec2_instances, max_age=600)
+
+    if len(terms) == 1 and terms[0].startswith('i-'):
+        instances = wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=MATCH_STARTSWITH)
+    elif len(terms) > 0:
+        instances = wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
+    instances = filter_facets(wf, instances, facets)
 
     for instance in instances:
         if 'Tag:Name' in instance:
@@ -125,19 +131,72 @@ def find_ec2(wf, profile, query, quicklook_baseurl):
             type='default',
             quicklookurl=quicklookurl
         )
-        item.setvar('title', title)
-        item.add_modifier(
+        item.setvar('action', 'copytoclipboard,postnotification')
+        item.setvar('notification_text', 'Copied private IP (%s) of %s.' % (instance.get('PrivateIpAddress', 'N/A'), title))
+        altmod = item.add_modifier(
             "alt",
             subtitle='public ip',
             arg=instance.get('PublicIpAddress', 'N/A'),
             valid=valid and 'PublicIpAddress' in instance,
         )
-        item.add_modifier(
+        altmod.setvar('action', 'copytoclipboard,postnotification')
+        altmod.setvar('notification_text', 'Copied public IP (%s) of %s.' % (instance.get('PublicIpAddress', 'N/A'), title))
+        cmdmod = item.add_modifier(
             "cmd",
             subtitle='open in console',
-            arg='https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Instances:search=%s;sort=instanceState' % instance['InstanceId'],
+            arg='https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s;sort=instanceState' % (region_name, instance['InstanceId']),
             valid=True,
         )
+        cmdmod.setvar('action', 'openurl')
+
+
+def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
+    buckets = wf.cached_data('%s-s3' % profile, get_s3_buckets, max_age=600)
+    region_name = boto3.Session().region_name
+
+    if terms:
+        buckets = wf.filter(' '.join(terms), buckets, key=lambda b: unicode(b['Name']))
+    buckets = filter_facets(wf, buckets, facets)
+
+    for bucket in buckets:
+        title = bucket['Name']
+        uid = '%s-bucket-%s' % (profile, title)
+        if quicklook_baseurl is not None:
+            quicklookurl = '%s/s3?%s' % (quicklook_baseurl, urlencode({
+                'template': 's3',
+                'context': json.dumps({
+                    'title': title,
+                    'uid': uid,
+                    'bucket': bucket,
+                }, default=json_serializer)
+            }))
+        else:
+            quicklookurl = None
+
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console',
+            arg='https://console.aws.amazon.com/s3/home?region=%s&bucket=%s&prefix=' % (region_name, bucket['Name']),
+            valid=True,
+            uid=uid,
+            icon='icons/s3_bucket.eps',
+            type='default',
+        )
+
+
+def parse_query(query):
+    terms, facets = [], {}
+    if query:
+        atoms = QUOTED_TERMS.findall(query)
+        for atom in atoms:
+            if ':' in atom:
+                k, v = QUOTED_SPLIT.split(atom)
+                facets[k] = v.strip("'\"")
+            else:
+                terms.append(atom)
+    log.debug('terms: %s', terms)
+    log.debug('facets: %s', facets)
+    return terms, facets
 
 
 @click.group()
@@ -195,7 +254,10 @@ def search(wf, quicklook_port, query):
             log.info('quicklook server should be on port %s' % quicklook_port)
         quicklook_baseurl = 'http://localhost:%s/quicklook' % quicklook_port
 
-    find_ec2(wf, profile, query, quicklook_baseurl)
+    terms, facets = parse_query(query)
+    region_name = boto3.Session().region_name
+    find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl)
+    find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl)
 
     wf.send_feedback()
 

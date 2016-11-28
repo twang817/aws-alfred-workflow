@@ -34,6 +34,19 @@
 				<false/>
 			</dict>
 		</array>
+		<key>7A0B639E-7E89-4443-8D59-6E486E864315</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>53EDC2A9-B5BD-43C2-945A-5EEE5FD09F40</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>A60E5E03-89A7-4B5B-B23C-830E60C4C902</key>
 		<array>
 			<dict>
@@ -51,7 +64,20 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>53EDC2A9-B5BD-43C2-945A-5EEE5FD09F40</string>
+				<string>A715AFE6-AA33-4AE1-938C-B0602767513D</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>A715AFE6-AA33-4AE1-938C-B0602767513D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>7A0B639E-7E89-4443-8D59-6E486E864315</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -61,14 +87,27 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>0D09861B-621E-4AB3-BCA5-5B247D4F7AED</string>
+				<string>BB748CAD-7275-47A8-85B9-C4E389CF25C9</string>
 				<key>modifiers</key>
-				<integer>524288</integer>
+				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
 				<false/>
 			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>E7975632-D186-40CD-87F5-096D73E17ECA</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>BB748CAD-7275-47A8-85B9-C4E389CF25C9</key>
+		<array>
 			<dict>
 				<key>destinationuid</key>
 				<string>A2328C8F-BD74-4D72-A2E4-146E0D4B8215</string>
@@ -79,11 +118,14 @@
 				<key>vitoclose</key>
 				<false/>
 			</dict>
+		</array>
+		<key>E7975632-D186-40CD-87F5-096D73E17ECA</key>
+		<array>
 			<dict>
 				<key>destinationuid</key>
 				<string>211BB567-5BA0-45FE-9EE8-668844744F27</string>
 				<key>modifiers</key>
-				<integer>1048576</integer>
+				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
@@ -104,48 +146,25 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>browser</key>
-				<string></string>
-				<key>spaces</key>
-				<string></string>
-				<key>url</key>
-				<string>{query}</string>
-				<key>utf8</key>
-				<true/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.openurl</string>
-			<key>uid</key>
-			<string>74371D05-1285-43DD-B514-B78F9200DD7B</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argumenttype</key>
-				<integer>0</integer>
-				<key>fixedorder</key>
+				<key>concurrently</key>
 				<false/>
-				<key>items</key>
-				<string>[{"imagefile":"2f181a4ae4a1761f3e21e15da165e2b65072e07d.png","title":"acm","arg":"https:\/\/console.aws.amazon.com\/acm\/home","subtitle":"Certificate Manager - Provision, Manage, and Deploy SSL\/TLS Certificates"},{"imagefile":"26aa1359c5713d237de8683edd3e9e2d445a7e5c.png","title":"apigateway","arg":"https:\/\/console.aws.amazon.com\/apigateway\/home","subtitle":"API Gateway - Build, Deploy and Manage APIs"},{"imagefile":"2458f97c07ec36dde1e1d46b70d1f2653f4cb9cc.png","title":"appstream","arg":"https:\/\/console.aws.amazon.com\/appstream\/home","subtitle":"AppStream - Low Latency Application Streaming"},{"imagefile":"cded53771458b1f24a738441f1fe634ae48729a0.png","title":"catalog","arg":"https:\/\/console.aws.amazon.com\/catalog\/home","subtitle":"Service Catalog - Create and Use Standardized Products"},{"imagefile":"a3475d972248dc7bf34e4de62689e83ec9a39839.png","title":"cloudformation","arg":"https:\/\/console.aws.amazon.com\/cloudformation\/home","subtitle":"CloudFormation - Create and Manage Resources with Templates"},{"imagefile":"3017c01bd3952f95ba9d3db5bd408fd92adb129d.png","title":"cloudfront","arg":"https:\/\/console.aws.amazon.com\/cloudfront\/home","subtitle":"CloudFront - Global Content Delivery Network"},{"imagefile":"121692adc88cb772864ea9a8261b87d5e8e431b0.png","title":"cloudsearch","arg":"https:\/\/console.aws.amazon.com\/cloudsearch\/home","subtitle":"CloudSearch - Managed Search Service"},{"imagefile":"4ce82bce401b43f9b8127ea20ef1aa7d972dda62.png","title":"cloudtrail","arg":"https:\/\/console.aws.amazon.com\/cloudtrail\/home","subtitle":"CloudTrail - Track User Activity and API Usage"},{"imagefile":"d66b9305022256ef5b66779e306709b1bbcea3d9.png","title":"cloudwatch","arg":"https:\/\/console.aws.amazon.com\/cloudwatch\/home","subtitle":"CloudWatch - Monitor Resources and Applications"},{"imagefile":"cb60b78c8190023632bb96a2c55e2bf64c7f131b.png","title":"codecommit","arg":"https:\/\/console.aws.amazon.com\/codecommit\/home","subtitle":"CodeCommit - Store Code in Private Git Repositories"},{"imagefile":"b55697f0a9b95bc9b84d205e822ed8c23e029f93.png","title":"codedeploy","arg":"https:\/\/console.aws.amazon.com\/codedeploy\/home","subtitle":"CodeDeploy - Automate Code Deployments"},{"imagefile":"72ba6a1205f43c73469b02edb1f8aa315342b2dc.png","title":"codepipeline","arg":"https:\/\/console.aws.amazon.com\/codepipeline\/home","subtitle":"CodePipeline - Release Software using Continuous Delivery"},{"imagefile":"cce11949d280161a3a7fbdeb95d2201900001187.png","title":"cognito","arg":"https:\/\/console.aws.amazon.com\/cognito\/home","subtitle":"Cognito - User Identity and App Data Synchronization"},{"imagefile":"66614bebfdc07fb9beecaadcf642bd0a7c8807f8.png","title":"config","arg":"https:\/\/console.aws.amazon.com\/config\/home","subtitle":"Config - Track Resource Inventory and Changes"},{"imagefile":"86d309ccaeb4888c45c99bd1f167dc49ce820305.png","title":"datapipeline","arg":"https:\/\/console.aws.amazon.com\/datapipeline\/home","subtitle":"Data Pipeline - Orchestration for Data-Driven Workflows"},{"imagefile":"6b3bab14787be2be6920753742cbca054ebcdf16.png","title":"devicefarm","arg":"https:\/\/console.aws.amazon.com\/devicefarm\/home","subtitle":"Device Farm - Test Android, iOS, and Web Apps on Real Devices in the Cloud"},{"imagefile":"a6a9aec156afd636ad1e5e11d7cb349c6791424e.png","title":"directconnect","arg":"https:\/\/console.aws.amazon.com\/directconnect\/home","subtitle":"Direct Connect - Dedicated Network Connection to AWS"},{"imagefile":"1dcfee1bc96ac08e71b6a1b28162c880ac7aa1ff.png","title":"directoryservice","arg":"https:\/\/console.aws.amazon.com\/directoryservice\/home","subtitle":"Directory Service - Host and Manage Active Directory"},{"imagefile":"e7ddde07b1835f0539fbc619619095364ae28b3a.png","title":"dms","arg":"https:\/\/console.aws.amazon.com\/dms\/home","subtitle":"DMS - Managed Database Migration Service"},{"imagefile":"aa5b0602827098f9700d067ce99a7802e780b0d4.png","title":"dynamodb","arg":"https:\/\/console.aws.amazon.com\/dynamodb\/home","subtitle":"DynamoDB - Managed NoSQL Database"},{"imagefile":"ac22e5bafb5d0cf16de2374e72ad9c9a6a83fdf1.png","title":"ec2","arg":"https:\/\/console.aws.amazon.com\/ec2\/home","subtitle":"EC2 - Virtual Servers in the Cloud"},{"imagefile":"4f5e886e000db24eadf901979276732483eaa1e3.png","title":"ecs","arg":"https:\/\/console.aws.amazon.com\/ecs\/home","subtitle":"EC2 Container Service - Run and Manage Docker Containers"},{"imagefile":"4a7ac7585bde977b4f2ec6ba2bc64441c9f788de.png","title":"efs","arg":"https:\/\/console.aws.amazon.com\/efs\/home","subtitle":"Elastic File System - Fully Managed File System for EC2"},{"imagefile":"7f51b8d74b428016c34c5afbd5b0cd521293b315.png","title":"elasticache","arg":"https:\/\/console.aws.amazon.com\/elasticache\/home","subtitle":"ElastiCache - In-Memory Cache"},{"imagefile":"a014324bf83d3221b9ba9dbc7bfbffa7b2dc6e0a.png","title":"elasticbeanstalk","arg":"https:\/\/console.aws.amazon.com\/elasticbeanstalk\/home","subtitle":"Elastic Beanstalk - Run and Manage Web Apps"},{"imagefile":"3ad64f957df074e05b2d3748b0d0f32f8ea70ba9.png","title":"elasticmapreduce","arg":"https:\/\/console.aws.amazon.com\/elasticmapreduce\/home","subtitle":"EMR - Managed Hadoop Framework"},{"imagefile":"9aff52d99f0d7589791056a2dcd8b764abceb88b.png","title":"elastictranscoder","arg":"https:\/\/console.aws.amazon.com\/elastictranscoder\/home","subtitle":"Elastic Transcoder - Easy-to-Use Scalable Media Transcoding"},{"imagefile":"f2c4f643b77410b3f9d538cc38be408f82494504.png","title":"es","arg":"https:\/\/console.aws.amazon.com\/es\/home","subtitle":"Elasticsearch Service - Run and Scale Elasticsearch Clusters"},{"imagefile":"2f1be8d9369155e162810ad703156360e1e58dee.png","title":"gamelift","arg":"https:\/\/console.aws.amazon.com\/gamelift\/home","subtitle":"GameLift - Deploy and Scale Session-based Multiplayer Games"},{"imagefile":"1a5c7dede2d306267e17bdd6358d63910e5e97f8.png","title":"glacier","arg":"https:\/\/console.aws.amazon.com\/glacier\/home","subtitle":"Glacier - Archive Storage in the Cloud"},{"imagefile":"1db8f7a7c8c9090dfa98f48870fedb3b13778aa8.png","title":"iam","arg":"https:\/\/console.aws.amazon.com\/iam\/home","subtitle":"Identity &amp; Access Management - Manage User Access and Encryption Keys"},{"imagefile":"5e43f0d17518305eba85cf27cff2ced71e450665.png","title":"snowball","arg":"https:\/\/console.aws.amazon.com\/importexport\/home","subtitle":"Snowball - Large Scale Data Transport"},{"imagefile":"6b6bec56d78a2e9c0c3f15ea141f74632b00e4d6.png","title":"inspector","arg":"https:\/\/console.aws.amazon.com\/inspector\/home","subtitle":"Inspector - Analyze Application Security"},{"imagefile":"79daad216afd80502b019866a9366a6fd26671be.png","title":"iot","arg":"https:\/\/console.aws.amazon.com\/iot\/home","subtitle":"AWS IoT - Connect Devices to the Cloud"},{"imagefile":"35f471546076eb5a571fb8a3f98eaca63d6accc9.png","title":"kinesis","arg":"https:\/\/console.aws.amazon.com\/kinesis\/home","subtitle":"Kinesis - Work with Real-Time Streaming Data"},{"imagefile":"fdbbf58ebdb1bb99db183f395a84cedf2d5eee97.png","title":"lambda","arg":"https:\/\/console.aws.amazon.com\/lambda\/home","subtitle":"Lambda - Run Code without Thinking about Servers"},{"imagefile":"f8da037b1468501daf13ed3634a4e90934099c14.png","title":"machinelearning","arg":"https:\/\/console.aws.amazon.com\/machinelearning\/home","subtitle":"Machine Learning - Build Smart Applications Quickly and Easily"},{"imagefile":"ea758191d63df8362b5c99c60088dc094b9c0cc5.png","title":"mobileanalytics","arg":"https:\/\/console.aws.amazon.com\/mobileanalytics\/home","subtitle":"Mobile Analytics - Collect, View and Export App Analytics"},{"imagefile":"d8f1b7aac76c67c22966754fb6782a0387ca768d.png","title":"mobilehub","arg":"https:\/\/console.aws.amazon.com\/mobilehub\/home","subtitle":"Mobile Hub - Build, Test, and Monitor Mobile Apps"},{"imagefile":"c4babb98ebe34fa2d5cca46e12be24cb27f67ced.png","title":"opsworks","arg":"https:\/\/console.aws.amazon.com\/opsworks\/home","subtitle":"OpsWorks - Automate Operations with Chef"},{"imagefile":"4adf1b184e8bc2ca2bbeffd5b5b73f7a61a5b3f8.png","title":"rds","arg":"https:\/\/console.aws.amazon.com\/rds\/home","subtitle":"RDS - Managed Relational Database Service"},{"imagefile":"51a81dab806ae4427cd0eedef2173979a230b04e.png","title":"redshift","arg":"https:\/\/console.aws.amazon.com\/redshift\/home","subtitle":"Redshift - Fast, Simple, Cost-Effective Data Warehousing"},{"imagefile":"eed9648a0772e999ce9e6a5745999efaa1d7d6dd.png","title":"route53","arg":"https:\/\/console.aws.amazon.com\/route53\/home","subtitle":"Route 53 - Scalable DNS and Domain Name Registration"},{"imagefile":"3c2b3201f243f0c712cb6d94dd9079cc54f0542b.png","title":"s3","arg":"https:\/\/console.aws.amazon.com\/s3\/home","subtitle":"S3 - Scalable Storage in the Cloud"},{"title":"servermigration","arg":"https:\/\/console.aws.amazon.com\/servermigration\/home","subtitle":"Server Migration - Migrate on-premises servers to AWS"},{"imagefile":"472612eb8d354d10c9499bd1f8956ee9742f80bf.png","title":"ses","arg":"https:\/\/console.aws.amazon.com\/ses\/home","subtitle":"SES - Email Sending and Receiving Service"},{"imagefile":"ffff1758774797acbc467f0aed11859d6bac91d2.png","title":"sns","arg":"https:\/\/console.aws.amazon.com\/sns\/home","subtitle":"SNS - Push Notification Service"},{"imagefile":"26e015d4f6748163cef79c5a39357bae2a63e991.png","title":"sqs","arg":"https:\/\/console.aws.amazon.com\/sqs\/home","subtitle":"SQS - Message Queue Service"},{"imagefile":"bcecffaa5185cec28427c5da87565cf0db386f6c.png","title":"storagegateway","arg":"https:\/\/console.aws.amazon.com\/storagegateway\/home","subtitle":"Storage Gateway - Hybrid Storage Integration"},{"imagefile":"ae38609ce6568b175d2c9085941246d958750e1f.png","title":"swf","arg":"https:\/\/console.aws.amazon.com\/swf\/home","subtitle":"SWF - Workflow Service for Coordinating Application Components"},{"imagefile":"4d206736b1d940d349b84f5705966e5bacf9595b.png","title":"trustedadvisor","arg":"https:\/\/console.aws.amazon.com\/trustedadvisor\/home","subtitle":"Trusted Advisor - Optimize Performance and Security"},{"imagefile":"53ef4793e9f431218de0379a69b3d511ca369fec.png","title":"vpc","arg":"https:\/\/console.aws.amazon.com\/vpc\/home","subtitle":"VPC - Isolated Cloud Resources"},{"imagefile":"0836b529981a9da60e063b4833abc00b4696b122.png","title":"waf","arg":"https:\/\/console.aws.amazon.com\/waf\/home","subtitle":"WAF - Filter Malicious Web Traffic"},{"imagefile":"8ce9f0aeebe4b4a545bad84fa576f53e5313b6e3.png","title":"workmail","arg":"https:\/\/console.aws.amazon.com\/workmail\/home","subtitle":"WorkMail - Secure Email and Calendaring Service"},{"imagefile":"b733b39b23461d2100b3aab4c4d7831d58da77b3.png","title":"workspaces","arg":"https:\/\/console.aws.amazon.com\/workspaces\/home","subtitle":"WorkSpaces - Desktops in the Cloud"},{"imagefile":"7a299d7f34f485cfa18f33ae63f2ded2fc9755ee.png","title":"workdocs","arg":"https:\/\/console.aws.amazon.com\/zocalo\/home","subtitle":"WorkDocs - Secure Enterprise Storage and Sharing Service"}]</string>
-				<key>keyword</key>
-				<string>awsweb</string>
-				<key>runningsubtext</key>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>python aws.py set_profile "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
 				<string></string>
-				<key>subtext</key>
-				<string></string>
-				<key>title</key>
-				<string>Search for an AWS Service ...</string>
-				<key>withspace</key>
-				<true/>
+				<key>type</key>
+				<integer>0</integer>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.listfilter</string>
+			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
-			<string>23A69182-59B8-41DB-9394-34757C762D1A</string>
+			<string>FDD48CCD-BA7C-429B-B210-A9DAF708B489</string>
 			<key>version</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -193,25 +212,69 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>python aws.py set_profile "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
+				<key>argumenttype</key>
 				<integer>0</integer>
+				<key>fixedorder</key>
+				<false/>
+				<key>items</key>
+				<string>[{"imagefile":"2f181a4ae4a1761f3e21e15da165e2b65072e07d.png","title":"acm","arg":"https:\/\/console.aws.amazon.com\/acm\/home","subtitle":"Certificate Manager - Provision, Manage, and Deploy SSL\/TLS Certificates"},{"imagefile":"26aa1359c5713d237de8683edd3e9e2d445a7e5c.png","title":"apigateway","arg":"https:\/\/console.aws.amazon.com\/apigateway\/home","subtitle":"API Gateway - Build, Deploy and Manage APIs"},{"imagefile":"2458f97c07ec36dde1e1d46b70d1f2653f4cb9cc.png","title":"appstream","arg":"https:\/\/console.aws.amazon.com\/appstream\/home","subtitle":"AppStream - Low Latency Application Streaming"},{"imagefile":"cded53771458b1f24a738441f1fe634ae48729a0.png","title":"catalog","arg":"https:\/\/console.aws.amazon.com\/catalog\/home","subtitle":"Service Catalog - Create and Use Standardized Products"},{"imagefile":"a3475d972248dc7bf34e4de62689e83ec9a39839.png","title":"cloudformation","arg":"https:\/\/console.aws.amazon.com\/cloudformation\/home","subtitle":"CloudFormation - Create and Manage Resources with Templates"},{"imagefile":"3017c01bd3952f95ba9d3db5bd408fd92adb129d.png","title":"cloudfront","arg":"https:\/\/console.aws.amazon.com\/cloudfront\/home","subtitle":"CloudFront - Global Content Delivery Network"},{"imagefile":"121692adc88cb772864ea9a8261b87d5e8e431b0.png","title":"cloudsearch","arg":"https:\/\/console.aws.amazon.com\/cloudsearch\/home","subtitle":"CloudSearch - Managed Search Service"},{"imagefile":"4ce82bce401b43f9b8127ea20ef1aa7d972dda62.png","title":"cloudtrail","arg":"https:\/\/console.aws.amazon.com\/cloudtrail\/home","subtitle":"CloudTrail - Track User Activity and API Usage"},{"imagefile":"d66b9305022256ef5b66779e306709b1bbcea3d9.png","title":"cloudwatch","arg":"https:\/\/console.aws.amazon.com\/cloudwatch\/home","subtitle":"CloudWatch - Monitor Resources and Applications"},{"imagefile":"cb60b78c8190023632bb96a2c55e2bf64c7f131b.png","title":"codecommit","arg":"https:\/\/console.aws.amazon.com\/codecommit\/home","subtitle":"CodeCommit - Store Code in Private Git Repositories"},{"imagefile":"b55697f0a9b95bc9b84d205e822ed8c23e029f93.png","title":"codedeploy","arg":"https:\/\/console.aws.amazon.com\/codedeploy\/home","subtitle":"CodeDeploy - Automate Code Deployments"},{"imagefile":"72ba6a1205f43c73469b02edb1f8aa315342b2dc.png","title":"codepipeline","arg":"https:\/\/console.aws.amazon.com\/codepipeline\/home","subtitle":"CodePipeline - Release Software using Continuous Delivery"},{"imagefile":"cce11949d280161a3a7fbdeb95d2201900001187.png","title":"cognito","arg":"https:\/\/console.aws.amazon.com\/cognito\/home","subtitle":"Cognito - User Identity and App Data Synchronization"},{"imagefile":"66614bebfdc07fb9beecaadcf642bd0a7c8807f8.png","title":"config","arg":"https:\/\/console.aws.amazon.com\/config\/home","subtitle":"Config - Track Resource Inventory and Changes"},{"imagefile":"86d309ccaeb4888c45c99bd1f167dc49ce820305.png","title":"datapipeline","arg":"https:\/\/console.aws.amazon.com\/datapipeline\/home","subtitle":"Data Pipeline - Orchestration for Data-Driven Workflows"},{"imagefile":"6b3bab14787be2be6920753742cbca054ebcdf16.png","title":"devicefarm","arg":"https:\/\/console.aws.amazon.com\/devicefarm\/home","subtitle":"Device Farm - Test Android, iOS, and Web Apps on Real Devices in the Cloud"},{"imagefile":"a6a9aec156afd636ad1e5e11d7cb349c6791424e.png","title":"directconnect","arg":"https:\/\/console.aws.amazon.com\/directconnect\/home","subtitle":"Direct Connect - Dedicated Network Connection to AWS"},{"imagefile":"1dcfee1bc96ac08e71b6a1b28162c880ac7aa1ff.png","title":"directoryservice","arg":"https:\/\/console.aws.amazon.com\/directoryservice\/home","subtitle":"Directory Service - Host and Manage Active Directory"},{"imagefile":"e7ddde07b1835f0539fbc619619095364ae28b3a.png","title":"dms","arg":"https:\/\/console.aws.amazon.com\/dms\/home","subtitle":"DMS - Managed Database Migration Service"},{"imagefile":"aa5b0602827098f9700d067ce99a7802e780b0d4.png","title":"dynamodb","arg":"https:\/\/console.aws.amazon.com\/dynamodb\/home","subtitle":"DynamoDB - Managed NoSQL Database"},{"imagefile":"ac22e5bafb5d0cf16de2374e72ad9c9a6a83fdf1.png","title":"ec2","arg":"https:\/\/console.aws.amazon.com\/ec2\/home","subtitle":"EC2 - Virtual Servers in the Cloud"},{"imagefile":"4f5e886e000db24eadf901979276732483eaa1e3.png","title":"ecs","arg":"https:\/\/console.aws.amazon.com\/ecs\/home","subtitle":"EC2 Container Service - Run and Manage Docker Containers"},{"imagefile":"4a7ac7585bde977b4f2ec6ba2bc64441c9f788de.png","title":"efs","arg":"https:\/\/console.aws.amazon.com\/efs\/home","subtitle":"Elastic File System - Fully Managed File System for EC2"},{"imagefile":"7f51b8d74b428016c34c5afbd5b0cd521293b315.png","title":"elasticache","arg":"https:\/\/console.aws.amazon.com\/elasticache\/home","subtitle":"ElastiCache - In-Memory Cache"},{"imagefile":"a014324bf83d3221b9ba9dbc7bfbffa7b2dc6e0a.png","title":"elasticbeanstalk","arg":"https:\/\/console.aws.amazon.com\/elasticbeanstalk\/home","subtitle":"Elastic Beanstalk - Run and Manage Web Apps"},{"imagefile":"3ad64f957df074e05b2d3748b0d0f32f8ea70ba9.png","title":"elasticmapreduce","arg":"https:\/\/console.aws.amazon.com\/elasticmapreduce\/home","subtitle":"EMR - Managed Hadoop Framework"},{"imagefile":"9aff52d99f0d7589791056a2dcd8b764abceb88b.png","title":"elastictranscoder","arg":"https:\/\/console.aws.amazon.com\/elastictranscoder\/home","subtitle":"Elastic Transcoder - Easy-to-Use Scalable Media Transcoding"},{"imagefile":"f2c4f643b77410b3f9d538cc38be408f82494504.png","title":"es","arg":"https:\/\/console.aws.amazon.com\/es\/home","subtitle":"Elasticsearch Service - Run and Scale Elasticsearch Clusters"},{"imagefile":"2f1be8d9369155e162810ad703156360e1e58dee.png","title":"gamelift","arg":"https:\/\/console.aws.amazon.com\/gamelift\/home","subtitle":"GameLift - Deploy and Scale Session-based Multiplayer Games"},{"imagefile":"1a5c7dede2d306267e17bdd6358d63910e5e97f8.png","title":"glacier","arg":"https:\/\/console.aws.amazon.com\/glacier\/home","subtitle":"Glacier - Archive Storage in the Cloud"},{"imagefile":"1db8f7a7c8c9090dfa98f48870fedb3b13778aa8.png","title":"iam","arg":"https:\/\/console.aws.amazon.com\/iam\/home","subtitle":"Identity &amp; Access Management - Manage User Access and Encryption Keys"},{"imagefile":"5e43f0d17518305eba85cf27cff2ced71e450665.png","title":"snowball","arg":"https:\/\/console.aws.amazon.com\/importexport\/home","subtitle":"Snowball - Large Scale Data Transport"},{"imagefile":"6b6bec56d78a2e9c0c3f15ea141f74632b00e4d6.png","title":"inspector","arg":"https:\/\/console.aws.amazon.com\/inspector\/home","subtitle":"Inspector - Analyze Application Security"},{"imagefile":"79daad216afd80502b019866a9366a6fd26671be.png","title":"iot","arg":"https:\/\/console.aws.amazon.com\/iot\/home","subtitle":"AWS IoT - Connect Devices to the Cloud"},{"imagefile":"35f471546076eb5a571fb8a3f98eaca63d6accc9.png","title":"kinesis","arg":"https:\/\/console.aws.amazon.com\/kinesis\/home","subtitle":"Kinesis - Work with Real-Time Streaming Data"},{"imagefile":"fdbbf58ebdb1bb99db183f395a84cedf2d5eee97.png","title":"lambda","arg":"https:\/\/console.aws.amazon.com\/lambda\/home","subtitle":"Lambda - Run Code without Thinking about Servers"},{"imagefile":"f8da037b1468501daf13ed3634a4e90934099c14.png","title":"machinelearning","arg":"https:\/\/console.aws.amazon.com\/machinelearning\/home","subtitle":"Machine Learning - Build Smart Applications Quickly and Easily"},{"imagefile":"ea758191d63df8362b5c99c60088dc094b9c0cc5.png","title":"mobileanalytics","arg":"https:\/\/console.aws.amazon.com\/mobileanalytics\/home","subtitle":"Mobile Analytics - Collect, View and Export App Analytics"},{"imagefile":"d8f1b7aac76c67c22966754fb6782a0387ca768d.png","title":"mobilehub","arg":"https:\/\/console.aws.amazon.com\/mobilehub\/home","subtitle":"Mobile Hub - Build, Test, and Monitor Mobile Apps"},{"imagefile":"c4babb98ebe34fa2d5cca46e12be24cb27f67ced.png","title":"opsworks","arg":"https:\/\/console.aws.amazon.com\/opsworks\/home","subtitle":"OpsWorks - Automate Operations with Chef"},{"imagefile":"4adf1b184e8bc2ca2bbeffd5b5b73f7a61a5b3f8.png","title":"rds","arg":"https:\/\/console.aws.amazon.com\/rds\/home","subtitle":"RDS - Managed Relational Database Service"},{"imagefile":"51a81dab806ae4427cd0eedef2173979a230b04e.png","title":"redshift","arg":"https:\/\/console.aws.amazon.com\/redshift\/home","subtitle":"Redshift - Fast, Simple, Cost-Effective Data Warehousing"},{"imagefile":"eed9648a0772e999ce9e6a5745999efaa1d7d6dd.png","title":"route53","arg":"https:\/\/console.aws.amazon.com\/route53\/home","subtitle":"Route 53 - Scalable DNS and Domain Name Registration"},{"imagefile":"3c2b3201f243f0c712cb6d94dd9079cc54f0542b.png","title":"s3","arg":"https:\/\/console.aws.amazon.com\/s3\/home","subtitle":"S3 - Scalable Storage in the Cloud"},{"title":"servermigration","arg":"https:\/\/console.aws.amazon.com\/servermigration\/home","subtitle":"Server Migration - Migrate on-premises servers to AWS"},{"imagefile":"472612eb8d354d10c9499bd1f8956ee9742f80bf.png","title":"ses","arg":"https:\/\/console.aws.amazon.com\/ses\/home","subtitle":"SES - Email Sending and Receiving Service"},{"imagefile":"ffff1758774797acbc467f0aed11859d6bac91d2.png","title":"sns","arg":"https:\/\/console.aws.amazon.com\/sns\/home","subtitle":"SNS - Push Notification Service"},{"imagefile":"26e015d4f6748163cef79c5a39357bae2a63e991.png","title":"sqs","arg":"https:\/\/console.aws.amazon.com\/sqs\/home","subtitle":"SQS - Message Queue Service"},{"imagefile":"bcecffaa5185cec28427c5da87565cf0db386f6c.png","title":"storagegateway","arg":"https:\/\/console.aws.amazon.com\/storagegateway\/home","subtitle":"Storage Gateway - Hybrid Storage Integration"},{"imagefile":"ae38609ce6568b175d2c9085941246d958750e1f.png","title":"swf","arg":"https:\/\/console.aws.amazon.com\/swf\/home","subtitle":"SWF - Workflow Service for Coordinating Application Components"},{"imagefile":"4d206736b1d940d349b84f5705966e5bacf9595b.png","title":"trustedadvisor","arg":"https:\/\/console.aws.amazon.com\/trustedadvisor\/home","subtitle":"Trusted Advisor - Optimize Performance and Security"},{"imagefile":"53ef4793e9f431218de0379a69b3d511ca369fec.png","title":"vpc","arg":"https:\/\/console.aws.amazon.com\/vpc\/home","subtitle":"VPC - Isolated Cloud Resources"},{"imagefile":"0836b529981a9da60e063b4833abc00b4696b122.png","title":"waf","arg":"https:\/\/console.aws.amazon.com\/waf\/home","subtitle":"WAF - Filter Malicious Web Traffic"},{"imagefile":"8ce9f0aeebe4b4a545bad84fa576f53e5313b6e3.png","title":"workmail","arg":"https:\/\/console.aws.amazon.com\/workmail\/home","subtitle":"WorkMail - Secure Email and Calendaring Service"},{"imagefile":"b733b39b23461d2100b3aab4c4d7831d58da77b3.png","title":"workspaces","arg":"https:\/\/console.aws.amazon.com\/workspaces\/home","subtitle":"WorkSpaces - Desktops in the Cloud"},{"imagefile":"7a299d7f34f485cfa18f33ae63f2ded2fc9755ee.png","title":"workdocs","arg":"https:\/\/console.aws.amazon.com\/zocalo\/home","subtitle":"WorkDocs - Secure Enterprise Storage and Sharing Service"}]</string>
+				<key>keyword</key>
+				<string>awsweb</string>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string>Search for an AWS Service ...</string>
+				<key>withspace</key>
+				<true/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.action.script</string>
+			<string>alfred.workflow.input.listfilter</string>
 			<key>uid</key>
-			<string>FDD48CCD-BA7C-429B-B210-A9DAF708B489</string>
+			<string>23A69182-59B8-41DB-9394-34757C762D1A</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>browser</key>
+				<string></string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>74371D05-1285-43DD-B514-B78F9200DD7B</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>awsclearcache</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>Clears cache</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>A60E5E03-89A7-4B5B-B23C-830E60C4C902</string>
+			<key>version</key>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -239,27 +302,6 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>argumenttype</key>
-				<integer>2</integer>
-				<key>keyword</key>
-				<string>awsclearcache</string>
-				<key>subtext</key>
-				<string></string>
-				<key>text</key>
-				<string>Clears cache</string>
-				<key>withspace</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.keyword</string>
-			<key>uid</key>
-			<string>A60E5E03-89A7-4B5B-B23C-830E60C4C902</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>lastpathcomponent</key>
 				<false/>
 				<key>onlyshowifquerypopulated</key>
@@ -267,7 +309,7 @@
 				<key>removeextension</key>
 				<false/>
 				<key>text</key>
-				<string>Copied private IP ({query}) of {var:title}.</string>
+				<string>{var:notification_text}</string>
 				<key>title</key>
 				<string></string>
 			</dict>
@@ -281,21 +323,19 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>lastpathcomponent</key>
+				<key>inputstring</key>
+				<string>{var:action}</string>
+				<key>matchcasesensitive</key>
 				<false/>
-				<key>onlyshowifquerypopulated</key>
-				<false/>
-				<key>removeextension</key>
-				<false/>
-				<key>text</key>
-				<string>Copied public IP ({query}) of {var:title}.</string>
-				<key>title</key>
-				<string></string>
+				<key>matchmode</key>
+				<integer>2</integer>
+				<key>matchstring</key>
+				<string>\bpostnotification\b</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.notification</string>
+			<string>alfred.workflow.utility.filter</string>
 			<key>uid</key>
-			<string>0D09861B-621E-4AB3-BCA5-5B247D4F7AED</string>
+			<string>7A0B639E-7E89-4443-8D59-6E486E864315</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -346,7 +386,7 @@
 			<key>config</key>
 			<dict>
 				<key>autopaste</key>
-				<false/>
+				<true/>
 				<key>clipboardtext</key>
 				<string>{query}</string>
 				<key>transient</key>
@@ -358,6 +398,33 @@
 			<string>A2328C8F-BD74-4D72-A2E4-146E0D4B8215</string>
 			<key>version</key>
 			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>inputstring</key>
+				<string>{var:action}</string>
+				<key>matchcasesensitive</key>
+				<false/>
+				<key>matchmode</key>
+				<integer>2</integer>
+				<key>matchstring</key>
+				<string>\bcopytoclipboard\b</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.filter</string>
+			<key>uid</key>
+			<string>BB748CAD-7275-47A8-85B9-C4E389CF25C9</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.junction</string>
+			<key>uid</key>
+			<string>A715AFE6-AA33-4AE1-938C-B0602767513D</string>
+			<key>version</key>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -378,80 +445,120 @@
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>inputstring</key>
+				<string>{var:action}</string>
+				<key>matchcasesensitive</key>
+				<false/>
+				<key>matchmode</key>
+				<integer>2</integer>
+				<key>matchstring</key>
+				<string>\bopenurl\b</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.filter</string>
+			<key>uid</key>
+			<string>E7975632-D186-40CD-87F5-096D73E17ECA</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
 	<key>uidata</key>
 	<dict>
-		<key>0D09861B-621E-4AB3-BCA5-5B247D4F7AED</key>
-		<dict>
-			<key>xpos</key>
-			<integer>370</integer>
-			<key>ypos</key>
-			<integer>300</integer>
-		</dict>
 		<key>211BB567-5BA0-45FE-9EE8-668844744F27</key>
 		<dict>
 			<key>xpos</key>
-			<integer>370</integer>
-			<key>ypos</key>
 			<integer>560</integer>
+			<key>ypos</key>
+			<integer>730</integer>
 		</dict>
 		<key>23A69182-59B8-41DB-9394-34757C762D1A</key>
 		<dict>
 			<key>xpos</key>
-			<integer>630</integer>
+			<integer>140</integer>
 			<key>ypos</key>
-			<integer>30</integer>
+			<integer>150</integer>
 		</dict>
 		<key>39CE076F-393E-4FBE-878F-C844B131BE0C</key>
 		<dict>
 			<key>xpos</key>
-			<integer>120</integer>
+			<integer>140</integer>
 			<key>ypos</key>
 			<integer>30</integer>
 		</dict>
 		<key>53EDC2A9-B5BD-43C2-945A-5EEE5FD09F40</key>
 		<dict>
 			<key>xpos</key>
-			<integer>370</integer>
+			<integer>560</integer>
 			<key>ypos</key>
-			<integer>180</integer>
+			<integer>470</integer>
 		</dict>
 		<key>5A23B1F5-8B0C-4D38-A0A6-5A25A5973868</key>
 		<dict>
 			<key>xpos</key>
-			<integer>860</integer>
+			<integer>370</integer>
 			<key>ypos</key>
-			<integer>180</integer>
+			<integer>270</integer>
 		</dict>
 		<key>74371D05-1285-43DD-B514-B78F9200DD7B</key>
 		<dict>
 			<key>xpos</key>
-			<integer>860</integer>
+			<integer>370</integer>
 			<key>ypos</key>
-			<integer>30</integer>
+			<integer>150</integer>
+		</dict>
+		<key>7A0B639E-7E89-4443-8D59-6E486E864315</key>
+		<dict>
+			<key>xpos</key>
+			<integer>460</integer>
+			<key>ypos</key>
+			<integer>500</integer>
 		</dict>
 		<key>A2328C8F-BD74-4D72-A2E4-146E0D4B8215</key>
 		<dict>
 			<key>xpos</key>
-			<integer>370</integer>
+			<integer>560</integer>
 			<key>ypos</key>
-			<integer>430</integer>
+			<integer>600</integer>
 		</dict>
 		<key>A60E5E03-89A7-4B5B-B23C-830E60C4C902</key>
 		<dict>
 			<key>xpos</key>
-			<integer>630</integer>
+			<integer>140</integer>
 			<key>ypos</key>
-			<integer>180</integer>
+			<integer>270</integer>
 		</dict>
 		<key>A644EB6D-C2F7-40CD-94A1-AE80FA78A7DC</key>
 		<dict>
 			<key>xpos</key>
-			<integer>120</integer>
+			<integer>140</integer>
 			<key>ypos</key>
-			<integer>330</integer>
+			<integer>600</integer>
+		</dict>
+		<key>A715AFE6-AA33-4AE1-938C-B0602767513D</key>
+		<dict>
+			<key>xpos</key>
+			<integer>340</integer>
+			<key>ypos</key>
+			<integer>630</integer>
+		</dict>
+		<key>BB748CAD-7275-47A8-85B9-C4E389CF25C9</key>
+		<dict>
+			<key>xpos</key>
+			<integer>460</integer>
+			<key>ypos</key>
+			<integer>630</integer>
+		</dict>
+		<key>E7975632-D186-40CD-87F5-096D73E17ECA</key>
+		<dict>
+			<key>xpos</key>
+			<integer>460</integer>
+			<key>ypos</key>
+			<integer>760</integer>
 		</dict>
 		<key>FDD48CCD-BA7C-429B-B210-A9DAF708B489</key>
 		<dict>
