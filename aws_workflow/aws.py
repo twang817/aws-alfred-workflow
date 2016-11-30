@@ -5,7 +5,7 @@ import botocore
 import concurrent.futures
 
 
-log = logging.getLogger('workflow')
+log = logging.getLogger()
 
 
 def get_ec2_instances():

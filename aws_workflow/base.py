@@ -21,7 +21,7 @@ from .utils import json_serializer
 from .utils import filter_facets
 
 
-log = logging.getLogger('workflow')
+log = logging.getLogger()
 
 
 def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
