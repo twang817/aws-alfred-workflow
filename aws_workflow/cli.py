@@ -2,18 +2,29 @@ from collections import namedtuple
 import logging
 import os
 import sys
+
 import boto3
 import click
-from workflow import Workflow3
+from workflow import (
+    Workflow3,
+    MATCH_ALL,
+    MATCH_ALLCHARS,
+    MATCH_ATOM,
+    MATCH_CAPITALS,
+    MATCH_INITIALS,
+    MATCH_INITIALS_CONTAIN,
+    MATCH_INITIALS_STARTSWITH,
+    MATCH_STARTSWITH,
+    MATCH_SUBSTRING,
+)
 from workflow.background import run_in_background, is_running
 
 from .base import find_ec2
 from .base import find_s3_bucket
 from .utils import (
+    autocomplete_group,
     get_profile,
     get_region,
-    get_group_map,
-    leader,
     make_pass_decorator,
     parse_query,
 )
@@ -42,55 +53,66 @@ def setup_logger(wf):
 
 
 pass_wf = make_pass_decorator('wf')
-pass_args = make_pass_decorator('args')
+pass_complete = make_pass_decorator('complete')
 ensure_default_command = make_pass_decorator('default_command', ensure=True, factory=lambda: search)
 ensure_profile = make_pass_decorator('profile', ensure=True, factory=get_profile)
 ensure_region = make_pass_decorator('region', ensure=True, factory=get_region)
-ensure_group_map = make_pass_decorator('group_map', ensure=True, factory=get_group_map)
 
 
 @click.group()
 def cli():
-    '''the root cli command'''
+    '''the main cli command'''
 
 
 @cli.command('script-filter')
 @click.argument('query')
 @pass_wf
-@ensure_group_map
 @ensure_default_command
-def script_filter(query, wf, group_map, default_command):
-    import shlex
-    atoms = shlex.split(query)
-    cmd, atoms = atoms[0] if atoms else u'', atoms[1:]
-    complete = []
+def script_filter(query, wf, default_command):
+    from .sflex import lexer
     ctx = click.get_current_context()
-    for key, group in group_map.items():
-        if cmd.startswith(key):
-            cmd = cmd[len(key):]
-            if not cmd and atoms:
-                cmd, atoms = atoms[0], atoms[1:]
-            if hasattr(group, 'commands'):
-                complete = group.commands.keys()
-                if cmd in group.commands.keys():
-                    ctx.obj['args'] = ' '.join([key, cmd])
-                    group(args=[cmd] + atoms, parent=ctx)
-                else:
-                    if cmd:
-                        complete = wf.filter(cmd, complete)
-                    for item in complete:
-                        wf.add_item(title=item,
-                                    subtitle=group.commands[item].__doc__ or '',
-                                    arg=item,
-                                    valid=True,
-                                    autocomplete=' '.join([key, item]) + ' ')
-                    wf.send_feedback()
-            else:
-                ctx.obj['args'] = key
-                group(args=[cmd] + atoms, parent=ctx)
+    lexer.input(query)
+    cmd = root
+    trimpos = 0
+    complete, args = '', (query,)
+    while True:
+        # if cmd is a Command, run it
+        if not hasattr(cmd, 'commands'):
+            ctx.obj['complete'] = complete
+            return cmd(args=args, parent=ctx)
+
+        # otherwise, grab another token from the stream
+        token = lexer.token()
+        if not token:
+            # if there are no more tokens in the stream, but we have not made it
+            # to a command yet, then we need to check if the group wants to be
+            # invoked even without a command.  note, this delegates the
+            # responsibility of generating the autocompletion for the group to
+            # the group callback
+            if cmd.invoke_without_command:
+                ctx.obj['complete'] = complete
+                return cmd(args=args, parent=ctx)
+            # if it does not, break here to perform autocompletion on the group's
+            # subcommands
             break
-    else:
-        default_command(args=[cmd] + atoms, parent=ctx)
+
+        # search for the token in subcommands
+        if token.value not in cmd.commands:
+            # if not found, we need to check if the group wants to be invoked
+            # without a command.  note, this delegates the responsibility of
+            # generating the autocompletion for the group to the group callback
+            if cmd.invoke_without_command:
+                ctx.obj['complete'] = complete
+                return cmd(args=args, parent=ctx)
+            break
+
+        # if were able to grab another token, update trimpos
+        trimpos = token.lexpos + len(token.value)
+        complete = query[:trimpos]
+        args = (query[trimpos:].strip(),)
+
+        cmd = cmd.commands[token.value]
+    autocomplete_group(wf, getattr(token, 'value', None), cmd, complete)
 
 
 @cli.command('set-profile')
@@ -110,7 +132,16 @@ def clear_cache(wf):
     wf.clear_cache(_filter)
 
 
-@leader('>', 'group')
+@click.group(invoke_without_command=True)
+@click.argument('query', required=False)
+@click.pass_context
+def root(ctx, query):
+    '''the root cli command'''
+    if ctx.invoked_subcommand is None:
+        return ctx.obj['default_command'](args=(query,), parent=ctx)
+
+
+@root.group('>')
 def wf_commands():
     '''run a workflow command'''
 
@@ -118,8 +149,8 @@ def wf_commands():
 @wf_commands.command('profile')
 @click.argument('query', required=False)
 @pass_wf
-@pass_args
-def list_profiles(query, wf, args):
+@pass_complete
+def list_profiles(query, wf, complete):
     '''set the active profile'''
     from six.moves import configparser
     parser = configparser.ConfigParser()
@@ -132,7 +163,7 @@ def list_profiles(query, wf, args):
             title=profile,
             valid=True,
             arg='set-profile %s' % profile,
-            autocomplete=' '.join([args, profile]),
+            autocomplete=' '.join([complete, profile]),
         )
         item.setvar('action', 'run-script,post-notification')
         item.setvar('notification_text', 'Selected profile: %s' % profile)
@@ -160,12 +191,12 @@ def help():
     raise NotImplementedError('Not Implemented')
 
 
-@leader('+', 'command')
+@root.command('+')
 @click.argument('query', required=False)
 @pass_wf
-@pass_args
+@pass_complete
 @ensure_region
-def aws_console(query, wf, args, region):
+def aws_console(query, wf, complete, region):
     '''opens browser to AWS console'''
     ConsoleItem = namedtuple('ConsoleItem', 'key name url icon')
     items = [
@@ -234,7 +265,7 @@ def aws_console(query, wf, args, region):
             title=item.key,
             subtitle=item.name,
             valid=True,
-            autocomplete=args + item.key,
+            autocomplete=complete + item.key,
             arg=item.url,
             icon=item.icon,
         )

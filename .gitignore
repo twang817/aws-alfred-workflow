@@ -110,9 +110,9 @@ ENV/
 /Alfred_Workflow-1.24.dist-info/
 /Jinja2-2.8.dist-info/
 /MarkupSafe-0.23.dist-info/
-/boto3-1.4.1.dist-info/
+/boto3-1.4.2.dist-info/
 /boto3/
-/botocore-1.4.78.dist-info/
+/botocore-1.4.81.dist-info/
 /botocore/
 /click-6.6.dist-info/
 /click/
@@ -140,4 +140,7 @@ ENV/
 /singledispatch_helpers.py
 /tornado-4.4.2.dist-info/
 /tornado/
-
+/ply-3.9.dist-info/
+/ply/
+/aws_workflow/parser.out
+/aws_workflow/parsetab.py

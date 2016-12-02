@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-import re
 
 import boto3
 import click
@@ -16,10 +15,6 @@ def json_serializer(obj):
     raise TypeError('Type not serializable')
 
 
-QUOTED_TERMS = re.compile(r'(?:[^\s,"]|"(?:\\.|[^"])*")+')
-QUOTED_SPLIT = re.compile(''':(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''')
-
-
 def filter_facets(wf, matches, facets):
     for k, v in facets.items():
         if v:
@@ -29,14 +24,10 @@ def filter_facets(wf, matches, facets):
 
 def parse_query(query):
     terms, facets = [], {}
+    log.debug('parsing query %s' % query)
     if query:
-        atoms = QUOTED_TERMS.findall(query)
-        for atom in atoms:
-            if ':' in atom:
-                k, v = QUOTED_SPLIT.split(atom)
-                facets[k] = v.strip("'\"")
-            else:
-                terms.append(atom)
+        from .qlex import parser
+        terms, facets = parser.parse(query)
     log.debug('terms: %s', terms)
     log.debug('facets: %s', facets)
     return terms, facets
@@ -94,14 +85,14 @@ def get_region():
     return region
 
 
-group_map = {}
-def get_group_map():
-    return group_map
-
-
-def leader(key, type):
-    def decorator(f):
-        group = getattr(click, type)()(f)
-        group_map[key] = group
-        return group
-    return decorator
+def autocomplete_group(wf, query, group, complete):
+    items = group.commands.keys()
+    if query:
+        items = wf.filter(query, items)
+    for item in items:
+        wf.add_item(title=item,
+                    subtitle=group.commands[item].__doc__ or '',
+                    arg=item,
+                    valid=True,
+                    autocomplete=complete + item)
+    wf.send_feedback()

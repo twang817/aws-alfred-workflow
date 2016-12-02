@@ -49,7 +49,7 @@ Select AWS Profile
 ------------------
 Select the AWS profile to use via:
 
-`awsprofile <profile name>`
+`aws >profile <profile name>`
 
 
 Searching for Instances
@@ -85,10 +85,10 @@ of `integration-testing`.
 
 Open AWS Web Console
 --------------------
-You can also open your browser to the AWS Web Console using the `awsweb`
-command:
+You can also open your browser to the AWS Web Console using the `+` leader
+prefix:
 
-`awsweb <query>`
+`aws +<query>`
 
 See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for demo.
 

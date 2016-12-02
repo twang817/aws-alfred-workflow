@@ -1,5 +1,7 @@
-jinja2
-Alfred-Workflow
-boto3
-click
-tornado
+Jinja2==2.8
+Alfred-Workflow==1.24
+boto3==1.4.2
+click==6.6
+tornado==4.4.2
+ply==3.9
+six==1.10.0
