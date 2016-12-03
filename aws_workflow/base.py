@@ -145,4 +145,5 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
             uid=uid,
             icon='icons/s3_bucket.png',
             type='default',
+            quicklookurl=quicklookurl
         )

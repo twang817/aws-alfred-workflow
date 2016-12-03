@@ -18,10 +18,22 @@ class Ec2QuicklookHandler(tornado.web.RequestHandler):
         self.write(template.render(**context))
 
 
+class S3QuicklookHandler(tornado.web.RequestHandler):
+    def enrich(self, context):
+        pass
+
+    def get(self):
+        template = templates.get_template('s3.html.j2')
+        context = json.loads(self.get_argument('context', '{}'))
+        self.enrich(context)
+        self.write(template.render(**context))
+
+
 def make_app():
     return tornado.web.Application([
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'static')}),
         (r'/quicklook/ec2', Ec2QuicklookHandler),
+        (r'/quicklook/s3', S3QuicklookHandler),
     ])
 
 

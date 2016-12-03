@@ -47,7 +47,8 @@ def get_s3_buckets():
                     continue
                 log.error(e)
             else:
-                for tag in tags.get('TagSet', []):
+                bucket['TagSet'] = tags.get('TagSet', [])
+                for tag in bucket['TagSet']:
                     bucket['facets'][tag['Key'].lower()] = tag['Value']
             finally:
                 buckets.append(bucket)

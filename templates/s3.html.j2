@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>Creation Date:</td>
+            <td>{{ bucket.CreationDate }}</td>
+        </tr>
+        <tr>
+            <td>Tags:</td>
+            <td>
+                <dl>
+                    {% for tag in bucket.TagSet %}
+                    <dt>{{ tag.Key }}</dt>
+                    <dd>{{ tag.Value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+    </table>
+    {{ foo }}
+</body>
+</html>
