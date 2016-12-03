@@ -120,6 +120,21 @@ def clear_cache(wf):
     wf.clear_cache(_filter)
 
 
+@cli.command('open-help')
+@pass_wf
+def clear_cache(wf):
+    wf.open_help()
+
+
+@cli.command('update-workflow')
+@pass_wf
+def update_workflow(wf):
+    if wf.start_update():
+        log.info('updating alfred')
+    else:
+        log.info('no update found')
+
+
 @cli.command('background')
 @click.option('--data_name', envvar='WF_CACHE_DATA_NAME')
 @click.argument('command')
@@ -184,9 +199,17 @@ def clear_cache(query, wf):
 
 
 @wf_commands.command('help')
-def help():
+@click.argument('query', required=False)
+@pass_wf
+def help(query, wf):
     '''opens help in browser'''
-    raise NotImplementedError('Not Implemented')
+    item = wf.add_item(
+        title='open help',
+        valid=True,
+        arg='open-help',
+        autocomplete='help')
+    item.setvar('action', 'run-script')
+    wf.send_feedback()
 
 
 @root.command('+')
@@ -300,7 +323,30 @@ def search(quicklook_port, query, wf, profile, region):
 
 
 def main():
-    wf = workflow.Workflow3()
+    wf = workflow.Workflow3(
+        update_settings={
+            'github_slug': 'twang817/aws-alfred-workflow',
+            'version': 'v3.1.0',
+        },
+        help_url='https://github.com/twang817/aws-alfred-workflow/blob/master/README.md',
+    )
+
+    if wf.update_available:
+        @wf_commands.command('update')
+        @click.argument('query', required=False)
+        @pass_wf
+        def auto_update(query, wf):
+            '''updates the workflow'''
+            item = wf.add_item(
+                title='New version available',
+                subtitle='Installs new version',
+                valid=True,
+                arg='update-workflow',
+                autocomplete='update')
+            item.setvar('action', 'run-script,post-notifications')
+            item.setvar('notification_text', 'updating AWS workflow...')
+            wf.send_feedback()
+
     setup_logger(wf)
     wf.run(lambda wf: cli(obj={
         'wf': wf,
