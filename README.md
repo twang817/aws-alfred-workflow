@@ -119,6 +119,14 @@ See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for d
 Changelog
 =========
 
+## v3.1.0 - 2016-12-03
+
+### Added
+- auto-update, run `aws >update`
+
+### Changed
+- fixed help command
+
 ## v3.0.0 - 2016-12-03
 
 ### Added
