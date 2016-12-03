@@ -1,24 +1,12 @@
 from collections import namedtuple
 import logging
 import os
-import sys
 
-import boto3
 import click
-from workflow import (
-    Workflow3,
-    MATCH_ALL,
-    MATCH_ALLCHARS,
-    MATCH_ATOM,
-    MATCH_CAPITALS,
-    MATCH_INITIALS,
-    MATCH_INITIALS_CONTAIN,
-    MATCH_INITIALS_STARTSWITH,
-    MATCH_STARTSWITH,
-    MATCH_SUBSTRING,
-)
+import workflow
 from workflow.background import run_in_background, is_running
 
+from . import aws
 from .base import find_ec2
 from .base import find_s3_bucket
 from .utils import (
@@ -132,6 +120,15 @@ def clear_cache(wf):
     wf.clear_cache(_filter)
 
 
+@cli.command('background')
+@click.option('--data_name', envvar='WF_CACHE_DATA_NAME')
+@click.argument('command')
+@pass_wf
+def background(command, data_name, wf):
+    data = getattr(aws, command)()
+    wf.cache_data(data_name, data)
+
+
 @click.group(invoke_without_command=True)
 @click.argument('query', required=False)
 @click.pass_context
@@ -171,8 +168,9 @@ def list_profiles(query, wf, complete):
 
 
 @wf_commands.command('clear-cache')
+@click.argument('query', required=False)
 @pass_wf
-def clear_cache(wf):
+def clear_cache(query, wf):
     '''clears cache'''
     item = wf.add_item(
         title='clear cache',
@@ -302,7 +300,7 @@ def search(quicklook_port, query, wf, profile, region):
 
 
 def main():
-    wf = Workflow3()
+    wf = workflow.Workflow3()
     setup_logger(wf)
     wf.run(lambda wf: cli(obj={
         'wf': wf,

@@ -1,22 +1,12 @@
-import logging
 import json
+import logging
+import os
 
 from six.moves.urllib.parse import urlencode
 
-from workflow import (
-    MATCH_ALL,
-    MATCH_ALLCHARS,
-    MATCH_ATOM,
-    MATCH_CAPITALS,
-    MATCH_INITIALS,
-    MATCH_INITIALS_CONTAIN,
-    MATCH_INITIALS_STARTSWITH,
-    MATCH_STARTSWITH,
-    MATCH_SUBSTRING,
-)
+import workflow
+from workflow.background import run_in_background, is_running
 
-from .aws import get_ec2_instances
-from .aws import get_s3_buckets
 from .utils import json_serializer
 from .utils import filter_facets
 
@@ -24,11 +14,43 @@ from .utils import filter_facets
 log = logging.getLogger()
 
 
+def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
+    data_name = '%s-%s-%s' % (profile, region, name)
+    data = wf.cached_data(data_name, max_age=0)
+
+    # if the cache was out of date (or missing as cached_data_fresh returns 0 if
+    # not found)
+    if not wf.cached_data_fresh(data_name, max_age=max_age):
+        wf.rerun = 1
+        if not is_running(data_name):
+            if cmdline is None:
+                raise Exception('could not generate cached data in background.  missing cmdline argument')
+            env = os.environ.copy()
+            env['AWS_PROFILE'] = profile
+            env['AWS_DEFAULT_REGION'] = region
+            env['WF_CACHE_DATA_NAME'] = data_name
+            run_in_background(data_name, cmdline, env=env)
+
+    return data
+
+
 def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    instances = wf.cached_data('%s-ec2' % profile, get_ec2_instances, max_age=600)
+    instances = get_cached_data(
+        wf, profile, region_name, 'ec2',
+        max_age=600,
+        cmdline=[
+            '/usr/bin/env',
+            'python',
+            wf.workflowfile('aws.py'),
+            'background',
+            'get_ec2_instances',
+        ])
+
+    if not instances:
+        return
 
     if len(terms) == 1 and terms[0].startswith('i-'):
-        instances = wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=MATCH_STARTSWITH)
+        instances = wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
     elif len(terms) > 0:
         instances = wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
     instances = filter_facets(wf, instances, facets)
@@ -58,7 +80,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             arg=instance.get('PrivateIpAddress', 'N/A'),
             valid=valid and 'PrivateIpAddress' in instance,
             uid=uid,
-            icon='icons/ec2.eps',
+            icon='icons/ec2_instance.png',
             type='default',
             quicklookurl=quicklookurl
         )
@@ -82,7 +104,19 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
 
 
 def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    buckets = wf.cached_data('%s-s3' % profile, get_s3_buckets, max_age=600)
+    buckets = get_cached_data(
+        wf, profile, region_name, 's3',
+        max_age=3600,
+        cmdline=[
+            '/usr/bin/env',
+            'python',
+            wf.workflowfile('aws.py'),
+            'background',
+            'get_s3_buckets',
+        ])
+
+    if not buckets:
+        return
 
     if terms:
         buckets = wf.filter(' '.join(terms), buckets, key=lambda b: unicode(b['Name']))
@@ -109,6 +143,6 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
             arg='https://console.aws.amazon.com/s3/home?region=%s&bucket=%s&prefix=' % (region_name, bucket['Name']),
             valid=True,
             uid=uid,
-            icon='icons/s3_bucket.eps',
+            icon='icons/s3_bucket.png',
             type='default',
         )
