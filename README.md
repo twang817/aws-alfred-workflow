@@ -65,23 +65,47 @@ Now, you can search your EC2 instances via:
 
 ### Search query
 
-The search query, by default, will search only `InstanceIds` if the query begins
-with `i-` and consists of only 1 term.  When searching `InstanceIds` the query
-must be an exact prefix match.
+Search queries can be in the form of a space separated list of `facet:value` or
+simply just `value`.  Single (`'`) or double (`"`) quotes may be used for either
+the `facet` or `value` to allow for spaces,  and escapes (`\\`) can be used to
+escape a literal apostrophe or quotation character.  Furthermore, colons in
+`facets` and `values` can be specified by quoting the string (e.g.:
+`url:'www.august8.net:8080'`).
 
-If the query does not begin with `i-`, the search will be performed using a
-fuzzy match against the name of the instance (via the `Name` tag).
+The available `facets` for each service, as well as the default `facet` if not
+provided, is specified for each service below.
 
-You can also search by other tags by specifying the tag in the form of
-`tag:value`.  For example, if I have an EC2 instances with a `Role` tag of
-`webserver`, I can use the query: `role:web` to find all instances that have
-`webserver` in the `Role` tag.  Note, that tag names are case insensitive.
+#### EC2 facets
 
-Additionally, you can combine multiple search terms.  For example, the query:
-`role:web environment:test my te app` might find an EC2 instance named
-`my-test-application` with a `Role` tag of `webserver` and a `Environment` tag
-of `integration-testing`.
+If a bare `value` starts with `i-`, the workflow will search for exact prefix
+matches against the EC2 Instance Id.  Otherwise, bare `value` queries will
+search the `Name` tag for the instance.
 
+All other facets map to the tags on the instance.  Note, all tag names are
+converted to lowercase.
+
+#### S3 facets
+
+The default facet is the `Name` tag for the bucket.
+
+All other facets map to the tags on the bucket.  Note, all tag names are
+converted to lowercase.
+
+#### Examples
+
+Search for an EC2 Instance with a `Role` tag of `webserver`:
+
+`aws role:web`
+
+If the EC2 Instance also has a `Environment` tag of `integration-testing`,
+I can search multiple tags via:
+
+`aws role:web environment:test`
+
+If the EC2 instance also happens to be named `my-test-application`, I may
+further restrict my query:
+
+`aws role:web environment:test my te app`
 
 Open AWS Web Console
 --------------------
@@ -94,6 +118,15 @@ See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for d
 
 Changelog
 =========
+
+## v3.0.0 - 2016-12-03
+
+### Added
+- ablity to search s3 buckets
+
+### Changed
+- using a subcommand syntax inspired by [gharian/alfred-github-workflow](https://github.com/gharlan/alfred-github-workflow)
+- improved responsiveness of the app by using background tasks
 
 ## v2.0.0 - 2016-11-27
 
