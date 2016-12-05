@@ -84,7 +84,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             type='default',
             quicklookurl=quicklookurl
         )
-        item.setvar('action', 'copytoclipboard,postnotification')
+        item.setvar('action', 'copy-to-clipboard,post-notification')
         item.setvar('notification_text', 'Copied private IP (%s) of %s.' % (instance.get('PrivateIpAddress', 'N/A'), title))
         altmod = item.add_modifier(
             "alt",
@@ -92,7 +92,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             arg=instance.get('PublicIpAddress', 'N/A'),
             valid=valid and 'PublicIpAddress' in instance,
         )
-        altmod.setvar('action', 'copytoclipboard,postnotification')
+        altmod.setvar('action', 'copy-to-clipboard,post-notification')
         altmod.setvar('notification_text', 'Copied public IP (%s) of %s.' % (instance.get('PublicIpAddress', 'N/A'), title))
         cmdmod = item.add_modifier(
             "cmd",
@@ -100,7 +100,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             arg='https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s;sort=instanceState' % (region_name, instance['InstanceId']),
             valid=True,
         )
-        cmdmod.setvar('action', 'openurl')
+        cmdmod.setvar('action', 'open-url')
 
 
 def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
