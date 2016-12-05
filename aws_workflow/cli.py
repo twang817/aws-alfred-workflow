@@ -15,7 +15,9 @@ from .utils import (
     get_region,
     make_pass_decorator,
     parse_query,
+    set_version,
 )
+from .version import __version__
 
 
 log = logging.getLogger()
@@ -106,14 +108,14 @@ def script_filter(query, wf, default_command):
 @cli.command('set-profile')
 @click.argument('profile')
 @pass_wf
-def set_profile(profile, wf):
+def do_set_profile(profile, wf):
     log.info('setting profile to %s' % profile)
     wf.settings['profile'] = profile
 
 
 @cli.command('clear-cache')
 @pass_wf
-def clear_cache(wf):
+def do_clear_cache(wf):
     log.info('cache cleared')
     def _filter(n):
         return not n.endswith('.pid')
@@ -122,17 +124,23 @@ def clear_cache(wf):
 
 @cli.command('open-help')
 @pass_wf
-def clear_cache(wf):
+def do_open_help(wf):
     wf.open_help()
 
 
 @cli.command('update-workflow')
 @pass_wf
-def update_workflow(wf):
+def do_update_workflow(wf):
     if wf.start_update():
         log.info('updating alfred')
     else:
         log.info('no update found')
+
+
+@cli.command('check-update')
+@pass_wf
+def do_check_update(wf):
+    wf.check_update(force=True)
 
 
 @cli.command('background')
@@ -188,7 +196,7 @@ def list_profiles(query, wf, complete):
 def clear_cache(query, wf):
     '''clears cache'''
     item = wf.add_item(
-        title='clear cache',
+        title='clear-cache',
         subtitle='clears cache',
         valid=True,
         arg='clear-cache',
@@ -201,14 +209,43 @@ def clear_cache(query, wf):
 @wf_commands.command('help')
 @click.argument('query', required=False)
 @pass_wf
-def help(query, wf):
+def open_help(query, wf):
     '''opens help in browser'''
     item = wf.add_item(
-        title='open help',
+        title='help',
+        subtitle='opens help in browser',
         valid=True,
         arg='open-help',
         autocomplete='help')
     item.setvar('action', 'run-script')
+    wf.send_feedback()
+
+
+@wf_commands.command('check-update')
+@click.argument('query', required=False)
+@pass_wf
+def check_update(query, wf):
+    '''checks for updates'''
+    item = wf.add_item(
+        title='check-update',
+        subtitle='checks for updates',
+        valid=True,
+        arg='check-update',
+        autocomplete='check-update')
+    item.setvar('action', 'run-script')
+    wf.send_feedback()
+
+
+@wf_commands.command('version')
+@click.argument('query', required=False)
+@pass_wf
+@set_version
+def get_version(query, wf):
+    '''%s'''
+    item = wf.add_item(
+        title='version',
+        subtitle=version,
+        valid=False)
     wf.send_feedback()
 
 
@@ -326,7 +363,7 @@ def main():
     wf = workflow.Workflow3(
         update_settings={
             'github_slug': 'twang817/aws-alfred-workflow',
-            'version': 'v3.1.2',
+            'version': __version__,
         },
         help_url='https://github.com/twang817/aws-alfred-workflow/blob/master/README.md',
     )

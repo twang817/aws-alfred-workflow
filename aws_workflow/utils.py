@@ -5,6 +5,8 @@ import os
 import boto3
 import click
 
+from .version import __version__
+
 
 log = logging.getLogger()
 
@@ -96,3 +98,8 @@ def autocomplete_group(wf, query, group, complete):
                     valid=True,
                     autocomplete=complete + item)
     wf.send_feedback()
+
+
+def set_version(f):
+    f.__doc__ = f.__doc__ % __version__
+    return f
