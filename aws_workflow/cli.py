@@ -326,7 +326,7 @@ def main():
     wf = workflow.Workflow3(
         update_settings={
             'github_slug': 'twang817/aws-alfred-workflow',
-            'version': 'v3.1.1',
+            'version': 'v3.1.2',
         },
         help_url='https://github.com/twang817/aws-alfred-workflow/blob/master/README.md',
     )
