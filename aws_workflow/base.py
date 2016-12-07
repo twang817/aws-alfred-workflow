@@ -97,7 +97,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
         cmdmod = item.add_modifier(
             "cmd",
             subtitle='open in console',
-            arg='https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s;sort=instanceState' % (region_name, instance['InstanceId']),
+            arg='https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s;sort=instanceState' % (region_name, region_name, instance['InstanceId']),
             valid=True,
         )
         cmdmod.setvar('action', 'open-url')
@@ -147,3 +147,4 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
             type='default',
             quicklookurl=quicklookurl
         )
+        item.setvar('action', 'open-url')

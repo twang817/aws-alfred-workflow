@@ -380,7 +380,7 @@ def main():
                 valid=True,
                 arg='update-workflow',
                 autocomplete='update')
-            item.setvar('action', 'run-script,post-notifications')
+            item.setvar('action', 'run-script,post-notification')
             item.setvar('notification_text', 'updating AWS workflow...')
             wf.send_feedback()
 
