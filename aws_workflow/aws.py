@@ -54,3 +54,50 @@ def get_s3_buckets():
                 buckets.append(bucket)
     return buckets
 
+
+def get_rds_instances():
+    client = boto3.client('rds')
+    dbs = []
+    log.debug('calling describe-db-clusters')
+    response = client.describe_db_clusters()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(client.list_tags_for_resource, ResourceName=db['DBClusterArn']): db for db in response['DBClusters']}
+        for future in concurrent.futures.as_completed(futures):
+            db = futures[future]
+            db['type'] = 'cluster'
+            db['facets'] = {}
+            db['facets']['name'] = db['Endpoint']
+            try:
+                tags = future.result()
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == 'NoSuchTagSet':
+                    continue
+                log.error(e)
+            else:
+                db['TagList'] = tags.get('TagList', [])
+                for tag in db['TagList']:
+                    db['facets'][tag['Key'].lower()] = tag['Value']
+            finally:
+                dbs.append(db)
+
+    response = client.describe_db_instances()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(client.list_tags_for_resource, ResourceName=db['DBInstanceArn']): db for db in response['DBInstances'] if 'DBClusterIdentifier' not in db}
+        for future in concurrent.futures.as_completed(futures):
+            db = futures[future]
+            db['type'] = 'instance'
+            db['facets'] = {}
+            db['facets']['name'] = db['Endpoint']['Address']
+            try:
+                tags = future.result()
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == 'NoSuchTagSet':
+                    continue
+                log.error(e)
+            else:
+                db['TagList'] = tags.get('TagList', [])
+                for tag in db['TagList']:
+                    db['facets'][tag['Key'].lower()] = tag['Value']
+            finally:
+                dbs.append(db)
+    return dbs

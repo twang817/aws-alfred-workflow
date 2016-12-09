@@ -148,3 +148,52 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'open-url')
+
+
+def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
+    dbs = get_cached_data(
+        wf, profile, region_name, 'rds',
+        max_age=3600,
+        cmdline=[
+            '/usr/bin/env',
+            'python',
+            wf.workflowfile('aws.py'),
+            'background',
+            'get_rds_instances',
+        ])
+
+    if not dbs:
+        return
+
+    if terms:
+        dbs = wf.filter(' '.join(terms), dbs, key=lambda b: unicode(b['facets']['name']))
+    dbs = filter_facets(wf, dbs, facets)
+
+    for db in dbs:
+        title = db['facets']['name']
+        uid = '%s-db-%s' % (profile, title)
+        if quicklook_baseurl is not None:
+            quicklookurl = '%s/rds?%s' % (quicklook_baseurl, urlencode({
+                'template': 'rds',
+                'context': json.dumps({
+                    'title': title,
+                    'uid': uid,
+                    'db': db,
+                }, default=json_serializer)
+            }))
+        else:
+            quicklookurl = None
+
+
+        item = wf.add_item(
+            title,
+            subtitle='copy endpoint url',
+            arg=title,
+            valid=True,
+            uid=uid,
+            icon='icons/db_instance.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'copy-to-clipboard,post-notification')
+        item.setvar('notification_text', 'Copied endpoint: %s.' % (title))

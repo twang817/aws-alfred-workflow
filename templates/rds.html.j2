@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>Engine:</td>
+            <td>{{ db.Engine }}</td>
+        </tr>
+        <tr>
+            <td>Engine Version:</td>
+            <td>{{ db.EngineVersion }}</td>
+        </tr>
+        <tr>
+            <td>Tags:</td>
+            <td>
+                <dl>
+                    {% for tag in db.Tags %}
+                    <dt>{{ tag.Key }}</dt>
+                    <dd>{{ tag.Value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+    </table>
+    {{ foo }}
+</body>
+</html>
+
