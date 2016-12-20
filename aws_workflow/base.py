@@ -74,10 +74,11 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
         else:
             quicklookurl = None
 
+        private_ip = instance.get('PrivateIpAddress', 'N/A')
         item = wf.add_item(
             title,
-            subtitle='private ip',
-            arg=instance.get('PrivateIpAddress', 'N/A'),
+            subtitle='copy private ip - ' + private_ip,
+            arg=private_ip,
             valid=valid and 'PrivateIpAddress' in instance,
             uid=uid,
             icon='icons/ec2_instance.png',
@@ -85,15 +86,18 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'copy-to-clipboard,post-notification')
-        item.setvar('notification_text', 'Copied private IP (%s) of %s.' % (instance.get('PrivateIpAddress', 'N/A'), title))
+        item.setvar('notification_title', 'Copied Private IP of EC2 Instance')
+        item.setvar('notification_text', '%s of %s' % (private_ip, title))
+        public_ip = instance.get('PublicIpAddress', 'N/A')
         altmod = item.add_modifier(
             "alt",
-            subtitle='public ip',
-            arg=instance.get('PublicIpAddress', 'N/A'),
+            subtitle='copy public ip - ' + public_ip,
+            arg=public_ip,
             valid=valid and 'PublicIpAddress' in instance,
         )
         altmod.setvar('action', 'copy-to-clipboard,post-notification')
-        altmod.setvar('notification_text', 'Copied public IP (%s) of %s.' % (instance.get('PublicIpAddress', 'N/A'), title))
+        altmod.setvar('notification_title', 'Copied Public IP of EC2 Instance')
+        altmod.setvar('notification_text', '%s of %s' % (public_ip, title))
         cmdmod = item.add_modifier(
             "cmd",
             subtitle='open in console',
@@ -196,4 +200,5 @@ def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'copy-to-clipboard,post-notification')
-        item.setvar('notification_text', 'Copied endpoint: %s.' % (title))
+        item.setvar('notification_title', 'Copied database endpoint')
+        item.setvar('notification_text', title)
