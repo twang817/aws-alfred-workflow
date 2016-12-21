@@ -93,12 +93,24 @@ def find_ec2():
             return wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
         return instances
 
+    state_icons = {
+        'pending': '⏲',
+        'rebooting': '⏲',
+        'running': '🍏',
+        'stopping': '💣',
+        'stopped': '🔴',
+        'terminated': '🔴',
+        'shutting-down': '💣',
+    }
+
     def populate_menu_item(wf, instance, title, uid, region_name, quicklookurl):
-        valid = instance['State']['Name'] == 'running'
+        state = instance['State']['Name']
+        valid = state == 'running'
+        state_icon = state_icons.get(state, '❔')
         private_ip = instance.get('PrivateIpAddress', 'N/A')
         item = wf.add_item(
             title,
-            subtitle='copy private ip - ' + private_ip,
+            subtitle='copy private ip - %s (status: %s %s)' % (private_ip, state, state_icon),
             arg=private_ip,
             valid=valid and 'PrivateIpAddress' in instance,
             uid=uid,
