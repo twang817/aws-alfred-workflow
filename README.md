@@ -3,8 +3,7 @@ aws-alfred-workflow
 
 AWS workflow for Alfred 3.
 
-This workflow allows you to search EC2 instances by `InstanceId` and by the
-`Name` tag.
+This workflow allows you to search through various AWS resources by ID, name and/or tag.
 
 Install
 =======
@@ -47,23 +46,35 @@ Usage
 
 Select AWS Profile
 ------------------
-Select the AWS profile to use via:
+Select the AWS profile to use by opening Alfred and typing:
 
 `aws >profile <profile name>`
 
 
-Searching for Instances
------------------------
-Now, you can search your EC2 instances via:
+## Searching
+Open Alfred and type:
 
 `aws <query>`
 
-* Select an instance to copy the private IP address to your clipboard.
-* Hold `alt` to copy public IP address to your clipboard.
-* Hold `cmd` to open AWS web console to that instance.
-* Press `shift` (or ⌘Y) to open quicklook to view instance details
+To perform a query against your selected profile. Alfred will then auto-populate results that are visible in your AWS account.
 
-### Search query
+
+#### Modifier Key Cheat Sheet
+Below is a table describing the currently supported AWS resource lookups and what Alfred will do upon hitting **Enter** when combined with modifier keys:
+
+|                                                             | (none)              | Cmd                 | Alt / Option                      | Ctrl | Shift <sub>(_press_, not hold)</sub> |
+| :---:                                                       | ---                 | ---                 | ---                               | ---  | ---                                  |
+| ![](icons/ec2_instance.png)<br/>EC2                         | Copies _private_ IP | Open in AWS console | Copies _public_ IP (if available) |      | Quicklook                            |
+| ![](icons/s3_bucket.png)<br/>S3                             | Open in AWS Console |                     |                                   |      | Quicklook                            |
+| ![](icons/db_instance.png)![](icons/db_cluster.png)<br/>RDS | Copy endpoint URL   | Open in AWS Console |                                   |      | Quicklook                            |
+| ![](icons/cfn_stack.png)CloudFormation                      | Open in AWS console |                     |                                   |      | Quicklook                            |
+| ![](icons/sqs_queue.png)<br/>SQS                            | Open in AWS console | Copy queue URL      |                                   |      | Quicklook                            |
+
+... more resources and modifiers to be implemented. Feel free to [fork this repo](#fork-destination-box) to implement your own!
+
+
+## Advanced
+### Facets
 
 Search queries can be in the form of a space separated list of `facet:value` or
 simply just `value`.  Single (`'`) or double (`"`) quotes may be used for either
@@ -72,24 +83,20 @@ escape a literal apostrophe or quotation character.  Furthermore, colons in
 `facets` and `values` can be specified by quoting the string (e.g.:
 `url:'www.august8.net:8080'`).
 
-The available `facets` for each service, as well as the default `facet` if not
-provided, is specified for each service below.
+The available `facets` for each service, as well as the default `facet` if not provided, is specified for each service below.
 
-#### EC2 facets
+#### EC2 Facets
 
-If a bare `value` starts with `i-`, the workflow will search for exact prefix
-matches against the EC2 Instance Id.  Otherwise, bare `value` queries will
-search the `Name` tag for the instance.
+If a bare `value` starts with `i-`, the workflow will search for exact prefix matches against the EC2 Instance Id.  Otherwise, bare `value` queries will search the `Name` tag for the instance.
 
 All other facets map to the tags on the instance.  Note, all tag names are
 converted to lowercase.
 
-#### S3 facets
+#### S3 Facets
 
 The default facet is the `Name` tag for the bucket.
 
-All other facets map to the tags on the bucket.  Note, all tag names are
-converted to lowercase.
+All other facets map to the tags on the bucket.  Note, all tag names are converted to lowercase.
 
 #### Examples
 
@@ -118,43 +125,7 @@ See [here](https://github.com/rkoval/alfred-aws-console-services-workflow) for d
 
 Changelog
 =========
-
-## v3.1.0 - 2016-12-03
-
-### Added
-- auto-update, run `aws >update`
-
-### Changed
-- fixed help command
-
-## v3.0.0 - 2016-12-03
-
-### Added
-- ablity to search s3 buckets
-
-### Changed
-- using a subcommand syntax inspired by [gharian/alfred-github-workflow](https://github.com/gharlan/alfred-github-workflow)
-- improved responsiveness of the app by using background tasks
-
-## v2.0.0 - 2016-11-27
-
-### Added
-- faceted searching
-
-## v1.1.1 - 2016-11-27
-
-### Fixed
-- bug where quicklook was not disabled if port was not configured
-
-## v1.1 - 2016-11-27
-
-### Added
-- added awsweb command (stolen from https://github.com/rkoval/alfred-aws-console-services-workflow)
-- added quicklook server
-
-### Changed
-- changed public IP binding to `alt` to not conflict with quicklook
-
+See [Releases](https://github.com/twang817/aws-alfred-workflow/releases) for a detailed list of changes between versions
 
 Contributors
 ============
