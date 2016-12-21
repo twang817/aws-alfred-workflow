@@ -8,17 +8,17 @@
     <table>
         <tr>
             <td>Engine:</td>
-            <td>{{ db.Engine }}</td>
+            <td>{{ rds.Engine }}</td>
         </tr>
         <tr>
             <td>Engine Version:</td>
-            <td>{{ db.EngineVersion }}</td>
+            <td>{{ rds.EngineVersion }}</td>
         </tr>
         <tr>
             <td>Tags:</td>
             <td>
                 <dl>
-                    {% for tag in db.Tags %}
+                    {% for tag in rds.Tags %}
                     <dt>{{ tag.Key }}</dt>
                     <dd>{{ tag.Value }}</dd>
                     {% endfor %}
@@ -26,7 +26,6 @@
             </td>
         </tr>
     </table>
-    {{ foo }}
 </body>
 </html>
 

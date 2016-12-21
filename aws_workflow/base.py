@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import logging
 import os
@@ -34,46 +35,65 @@ def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
     return data
 
 
-def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    instances = get_cached_data(
-        wf, profile, region_name, 'ec2',
-        max_age=600,
+def helper(item_identifier, aws_list_function_name):
+    def decorator(func):
+        def wrapper(wf, profile, region_name, terms, facets, quicklook_baseurl):
+            functions = func()
+
+            objects = get_cached_data(
+                wf, profile, region_name, item_identifier,
+                max_age=3600,
         cmdline=[
             '/usr/bin/env',
             'python',
             wf.workflowfile('aws.py'),
             'background',
-            'get_ec2_instances',
+                    aws_list_function_name,
         ])
 
-    if not instances:
+            if not objects:
         return
 
-    if len(terms) == 1 and terms[0].startswith('i-'):
-        instances = wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
-    elif len(terms) > 0:
-        instances = wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
-    instances = filter_facets(wf, instances, facets)
+            if terms:
+                objects = functions['filter_items'](wf, objects, terms)
+            objects = filter_facets(wf, objects, facets)
 
-    for instance in instances:
-        if 'Tag:Name' in instance:
-            title = '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
-        else:
-            title = instance['InstanceId']
-        uid = '%s-ec2-%s' % (profile, instance['InstanceId'])
-        valid = instance['State']['Name'] == 'running'
+            for object in objects:
+                title = functions['create_title'](object)
+                uid = '%s-%s-%s' % (profile, item_identifier, title)
         if quicklook_baseurl is not None:
-            quicklookurl = '%s/ec2?%s' % (quicklook_baseurl, urlencode({
-                'template': 'ec2',
+                    quicklookurl = '%s/%s?%s' % (quicklook_baseurl, item_identifier, urlencode({
+                        'template': item_identifier,
                 'context': json.dumps({
                     'title': title,
                     'uid': uid,
-                    'instance': instance,
+                            item_identifier: object,
                 }, default=json_serializer)
             }))
         else:
             quicklookurl = None
 
+                functions['populate_menu_item'](wf, object, title, uid, region_name, quicklookurl)
+        return wrapper
+    return decorator
+
+
+@helper(item_identifier='ec2', aws_list_function_name='get_ec2_instances')
+def find_ec2():
+    def create_title(instance):
+        if 'Tag:Name' in instance:
+            return '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
+        return instance['InstanceId']
+
+    def filter_items(wf, instances, terms):
+        if len(terms) == 1 and terms[0].startswith('i-'):
+            return wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
+        elif len(terms) > 0:
+            return wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
+        return instances
+
+    def populate_menu_item(wf, instance, title, uid, region_name, quicklookurl):
+        valid = instance['State']['Name'] == 'running'
         private_ip = instance.get('PrivateIpAddress', 'N/A')
         item = wf.add_item(
             title,
@@ -106,41 +126,22 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
         )
         cmdmod.setvar('action', 'open-url')
 
+    return {
+        'create_title': create_title,
+        'filter_items': filter_items,
+        'populate_menu_item': populate_menu_item
+    }
 
-def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    buckets = get_cached_data(
-        wf, profile, region_name, 's3',
-        max_age=3600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
-            'get_s3_buckets',
-        ])
 
-    if not buckets:
-        return
+@helper(item_identifier='s3', aws_list_function_name='get_s3_buckets')
+def find_s3_bucket():
+    def create_title(bucket):
+        return bucket['Name']
 
-    if terms:
-        buckets = wf.filter(' '.join(terms), buckets, key=lambda b: unicode(b['Name']))
-    buckets = filter_facets(wf, buckets, facets)
+    def filter_items(wf, items, terms):
+        return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['Name']))
 
-    for bucket in buckets:
-        title = bucket['Name']
-        uid = '%s-bucket-%s' % (profile, title)
-        if quicklook_baseurl is not None:
-            quicklookurl = '%s/s3?%s' % (quicklook_baseurl, urlencode({
-                'template': 's3',
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
-                    'bucket': bucket,
-                }, default=json_serializer)
-            }))
-        else:
-            quicklookurl = None
-
+    def populate_menu_item(wf, bucket, title, uid, region_name, quicklookurl):
         item = wf.add_item(
             title,
             subtitle='open in AWS console',
@@ -153,42 +154,22 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
         )
         item.setvar('action', 'open-url')
 
-
-def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    dbs = get_cached_data(
-        wf, profile, region_name, 'rds',
-        max_age=3600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
-            'get_rds_instances',
-        ])
-
-    if not dbs:
-        return
-
-    if terms:
-        dbs = wf.filter(' '.join(terms), dbs, key=lambda b: unicode(b['facets']['name']))
-    dbs = filter_facets(wf, dbs, facets)
-
-    for db in dbs:
-        title = db['facets']['name']
-        uid = '%s-db-%s' % (profile, title)
-        if quicklook_baseurl is not None:
-            quicklookurl = '%s/rds?%s' % (quicklook_baseurl, urlencode({
-                'template': 'rds',
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
-                    'db': db,
-                }, default=json_serializer)
-            }))
-        else:
-            quicklookurl = None
+    return {
+        'create_title': create_title,
+        'filter_items': filter_items,
+        'populate_menu_item': populate_menu_item
+    }
 
 
+@helper(item_identifier='rds', aws_list_function_name='get_rds_instances')
+def find_database():
+    def create_title(db):
+        return db['facets']['name']
+
+    def filter_items(wf, items, terms):
+        return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['facets']['name']))
+
+    def populate_menu_item(wf, db, title, uid, region_name, quicklookurl):
         item = wf.add_item(
             title,
             subtitle='copy endpoint url',
@@ -202,3 +183,9 @@ def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
         item.setvar('action', 'copy-to-clipboard,post-notification')
         item.setvar('notification_title', 'Copied database endpoint')
         item.setvar('notification_text', title)
+
+    return {
+        'create_title': create_title,
+        'filter_items': filter_items,
+        'populate_menu_item': populate_menu_item
+    }
