@@ -171,19 +171,35 @@ def find_database():
         return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['facets']['name']))
 
     def populate_menu_item(wf, db, title, uid, region_name, quicklookurl):
+        if db['type'] == 'instance':
+            db_id = db['DBInstanceIdentifier']
+            icon = 'icons/db_instance.png'
+            url = 'https://%s.console.aws.amazon.com/rds/home?region=%s#dbinstances:id=%s;sf=all' % (region_name, region_name, db_id)
+        else:
+            icon = 'icons/db_cluster.png'
+            url = 'https://%s.console.aws.amazon.com/rds/home?region=%s#dbclusters:' % (region_name, region_name)
+
         item = wf.add_item(
             title,
-            subtitle='copy endpoint url',
+            subtitle='copy endpoint url (%s)' % db['type'],
             arg=title,
             valid=True,
             uid=uid,
-            icon='icons/db_instance.png',
+            icon=icon,
             type='default',
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'copy-to-clipboard,post-notification')
         item.setvar('notification_title', 'Copied database endpoint')
         item.setvar('notification_text', title)
+
+        cmdmod = item.add_modifier(
+            "cmd",
+            subtitle='open in AWS console',
+            arg=url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'open-url')
 
     return {
         'create_title': create_title,
