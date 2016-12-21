@@ -225,3 +225,46 @@ def find_stack():
         'populate_menu_item': populate_menu_item
     }
 
+
+@helper(item_identifier='sqs', aws_list_function_name='get_sqs_queues')
+def find_queue():
+    def create_title(queue):
+        return queue['QueueName']
+
+    def filter_items(wf, stacks, terms):
+        log.warn(stacks)
+        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['QueueUrl']))
+
+    def populate_menu_item(wf, queue, title, uid, region_name, quicklookurl):
+        queue_url = queue['QueueUrl']
+        # aws console doesn't use the actual queue url attribute for its query parameters, so manually construct it
+        formatted_queue_url = 'https://sqs.%s.amazonaws.com%s' % (region_name, queue_url.split('amazonaws.com')[-1])
+        url = 'https://console.aws.amazon.com/sqs/home?region=%s#queue-browser:selected=%s;prefix=' % (region_name, formatted_queue_url)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (messages available: %s; in-flight: %s)' % (queue['ApproximateNumberOfMessages'], queue['ApproximateNumberOfMessagesNotVisible']),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/sqs_queue.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        cmdmod = item.add_modifier(
+            "cmd",
+            subtitle='copy queue url',
+            arg=queue_url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied queue URL')
+        cmdmod.setvar('notification_text', queue_url)
+
+    return {
+        'create_title': create_title,
+        'filter_items': filter_items,
+        'populate_menu_item': populate_menu_item
+    }
+

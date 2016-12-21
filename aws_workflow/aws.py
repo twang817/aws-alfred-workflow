@@ -123,3 +123,27 @@ def get_cfn_stacks():
         else:
             break
     return items
+
+
+def get_sqs_queues():
+    client = boto3.client('sqs')
+    queues = []
+    response = client.list_queues()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(client.get_queue_attributes, QueueUrl=queue_url, AttributeNames=['All']): queue_url for queue_url in response['QueueUrls']}
+        for future in concurrent.futures.as_completed(futures):
+            queue_url = futures[future]
+            queue = {
+                'QueueUrl': queue_url,
+            }
+            try:
+                attributes = future.result()
+            except botocore.exceptions.ClientError as e:
+                log.error(e)
+            else:
+                for key, attribute in list(attributes['Attributes'].items()):
+                    queue[key] = attribute
+                queue['QueueName'] = queue['QueueArn'].split(':')[-1]
+            finally:
+                queues.append(queue)
+    return queues

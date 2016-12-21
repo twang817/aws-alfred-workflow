@@ -35,6 +35,10 @@ class CfnQuicklookHandler(BaseHandler):
     template = 'cfn.html.j2'
 
 
+class SqsQuicklookHandler(BaseHandler):
+    template = 'sqs.html.j2'
+
+
 def make_app():
     return tornado.web.Application([
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'static')}),
@@ -42,6 +46,7 @@ def make_app():
         (r'/quicklook/s3', S3QuicklookHandler),
         (r'/quicklook/rds', RdsQuicklookHandler),
         (r'/quicklook/cfn', CfnQuicklookHandler),
+        (r'/quicklook/sqs', SqsQuicklookHandler),
     ])
 
 
