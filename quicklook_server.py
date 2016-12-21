@@ -7,37 +7,32 @@ import tornado.autoreload
 import tornado.ioloop
 import tornado.web
 
-class Ec2QuicklookHandler(tornado.web.RequestHandler):
+
+class BaseHandler(tornado.web.RequestHandler):
     def enrich(self, context):
         pass
 
     def get(self):
-        template = templates.get_template('ec2.html.j2')
+        template = templates.get_template(self.template)
         context = json.loads(self.get_argument('context', '{}'))
         self.enrich(context)
         self.write(template.render(**context))
 
 
-class S3QuicklookHandler(tornado.web.RequestHandler):
-    def enrich(self, context):
-        pass
-
-    def get(self):
-        template = templates.get_template('s3.html.j2')
-        context = json.loads(self.get_argument('context', '{}'))
-        self.enrich(context)
-        self.write(template.render(**context))
+class Ec2QuicklookHandler(BaseHandler):
+    template = 'ec2.html.j2'
 
 
-class RdsQuicklookHandler(tornado.web.RequestHandler):
-    def enrich(self, context):
-        pass
+class S3QuicklookHandler(BaseHandler):
+    template = 's3.html.j2'
 
-    def get(self):
-        template = templates.get_template('rds.html.j2')
-        context = json.loads(self.get_argument('context', '{}'))
-        self.enrich(context)
-        self.write(template.render(**context))
+
+class RdsQuicklookHandler(BaseHandler):
+    template = 'rds.html.j2'
+
+
+class CfnQuicklookHandler(BaseHandler):
+    template = 'cfn.html.j2'
 
 
 def make_app():
@@ -46,6 +41,7 @@ def make_app():
         (r'/quicklook/ec2', Ec2QuicklookHandler),
         (r'/quicklook/s3', S3QuicklookHandler),
         (r'/quicklook/rds', RdsQuicklookHandler),
+        (r'/quicklook/cfn', CfnQuicklookHandler),
     ])
 
 

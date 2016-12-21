@@ -1,0 +1,97 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>Stack ID:</td>
+            <td>{{ cfn.StackId }}</td>
+        </tr>
+        <tr>
+            <td>Stack Status:</td>
+            <td>{{ cfn.StackStatus }}</td>
+        </tr>
+        <tr>
+            <td>Stack Status Reason:</td>
+            <td>{{ cfn.StackStatusReason | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Creation Time:</td>
+            <td>{{ cfn.CreationTime }}</td>
+        </tr>
+        <tr>
+            <td>Update Time:</td>
+            <td>{{ cfn.LastUpdatedTime | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Changeset ID:</td>
+            <td>{{ cfn.ChangeSetId | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Disable Rollback:</td>
+            <td>{{ cfn.DisableRollback }}</td>
+        </tr>
+        <tr>
+            <td>Timeout (in minutes)</td>
+            <td>{{ cfn.TimeoutInMinutes | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Role ARN:</td>
+            <td>{{ cfn.RoleARN | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Notification ARNs:</td>
+            <td>{{ cfn.NotificationARNs }}</td>
+        </tr>
+        <tr>
+            <td>Capabilities:</td>
+            <td>
+                {% for capability in cfn.Capabilities %}
+                {{ capability }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Description:</td>
+            <td>{{ cfn.Description }}</td>
+        </tr>
+        <tr>
+            <td>Parameters:</td>
+            <td>
+                <dl>
+                    {% for parameter in cfn.Parameters %}
+                    <dt>{{ parameter.ParameterKey }}</dt>
+                    <dd>{{ parameter.ParameterValue }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+        <tr>
+            <td>Outputs:</td>
+            <td>
+                <dl>
+                    {% for output in cfn.Outputs %}
+                    <dt>{{ output.OutputKey }}</dt>
+                    <dd>{{ output.OutputValue }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+        <tr>
+            <td>Tags:</td>
+            <td>
+                <dl>
+                    {% for tag in cfn.Tags %}
+                    <dt>{{ tag.Key }}</dt>
+                    <dd>{{ tag.Value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

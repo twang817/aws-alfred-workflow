@@ -10,6 +10,7 @@ from . import aws
 from .base import find_ec2
 from .base import find_s3_bucket
 from .base import find_database
+from .base import find_stack
 from .utils import (
     autocomplete_group,
     get_profile,
@@ -354,9 +355,14 @@ def search(quicklook_port, query, wf, profile, region):
         quicklook_baseurl = 'http://localhost:%s/quicklook' % quicklook_port
 
     terms, facets = parse_query(query)
-    find_ec2(wf, profile, region, terms, facets, quicklook_baseurl)
-    find_s3_bucket(wf, profile, region, terms, facets, quicklook_baseurl)
-    find_database(wf, profile, region, terms, facets, quicklook_baseurl)
+    finders = [
+        find_ec2,
+        find_s3_bucket,
+        find_database,
+        find_stack,
+    ]
+    for finder in finders:
+        finder(wf, profile, region, terms, facets, quicklook_baseurl)
 
     wf.send_feedback()
 

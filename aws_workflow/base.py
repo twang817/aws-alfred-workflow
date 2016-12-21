@@ -10,6 +10,7 @@ from workflow.background import run_in_background, is_running
 
 from .utils import json_serializer
 from .utils import filter_facets
+from .utils import create_stack_status_icons
 
 
 log = logging.getLogger()
@@ -43,16 +44,16 @@ def helper(item_identifier, aws_list_function_name):
             objects = get_cached_data(
                 wf, profile, region_name, item_identifier,
                 max_age=3600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
+                cmdline=[
+                    '/usr/bin/env',
+                    'python',
+                    wf.workflowfile('aws.py'),
+                    'background',
                     aws_list_function_name,
-        ])
+                ])
 
             if not objects:
-        return
+                return
 
             if terms:
                 objects = functions['filter_items'](wf, objects, terms)
@@ -61,17 +62,17 @@ def helper(item_identifier, aws_list_function_name):
             for object in objects:
                 title = functions['create_title'](object)
                 uid = '%s-%s-%s' % (profile, item_identifier, title)
-        if quicklook_baseurl is not None:
+                if quicklook_baseurl is not None:
                     quicklookurl = '%s/%s?%s' % (quicklook_baseurl, item_identifier, urlencode({
                         'template': item_identifier,
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
+                        'context': json.dumps({
+                            'title': title,
+                            'uid': uid,
                             item_identifier: object,
-                }, default=json_serializer)
-            }))
-        else:
-            quicklookurl = None
+                        }, default=json_serializer)
+                    }))
+                else:
+                    quicklookurl = None
 
                 functions['populate_menu_item'](wf, object, title, uid, region_name, quicklookurl)
         return wrapper
@@ -189,3 +190,38 @@ def find_database():
         'filter_items': filter_items,
         'populate_menu_item': populate_menu_item
     }
+
+
+@helper(item_identifier='cfn', aws_list_function_name='get_cfn_stacks')
+def find_stack():
+    def create_title(stack):
+        return stack['StackName']
+
+    def filter_items(wf, stacks, terms):
+        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['StackName']))
+
+    stack_status_icons = create_stack_status_icons()
+
+    def populate_menu_item(wf, stack, title, uid, region_name, quicklookurl):
+        url = 'https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stack/detail?stackId=%s' % (region_name, region_name, stack['StackId'])
+
+        status = stack['StackStatus']
+        stack_status_icon = stack_status_icons.get(status, '')
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s %s)' % (status, stack_status_icon),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/cfn_stack.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+    return {
+        'create_title': create_title,
+        'filter_items': filter_items,
+        'populate_menu_item': populate_menu_item
+    }
+

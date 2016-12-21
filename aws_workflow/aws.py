@@ -101,3 +101,25 @@ def get_rds_instances():
             finally:
                 dbs.append(db)
     return dbs
+
+
+def get_cfn_stacks():
+    client = boto3.client('cloudformation')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling describe_stacks')
+        response = client.describe_stacks(**next_token)
+        for item in response['Stacks']:
+            item['facets'] = {}
+            item['facets']['name'] = item['StackName']
+            if 'Tags' in item:
+                for tag in item['Tags']:
+                    item['Tag:%s' % tag['Key']] = tag['Value']
+                    item['facets'][tag['Key'].lower()] = tag['Value']
+            items.append(item)
+        if 'NextToken' in response:
+            next_token['NextToken'] = response['NextToken']
+        else:
+            break
+    return items
