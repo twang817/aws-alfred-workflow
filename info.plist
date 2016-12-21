@@ -223,7 +223,7 @@
 				<key>queuemode</key>
 				<integer>1</integer>
 				<key>runningsubtext</key>
-				<string></string>
+				<string>searching ...</string>
 				<key>script</key>
 				<string>python aws.py script-filter "{query}"</string>
 				<key>scriptargtype</key>
@@ -231,7 +231,7 @@
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
-				<string></string>
+				<string>AWS Alfred Workflow</string>
 				<key>title</key>
 				<string>Search AWS</string>
 				<key>type</key>
