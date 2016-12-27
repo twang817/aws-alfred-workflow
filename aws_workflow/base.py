@@ -356,3 +356,46 @@ class FunctionFinder(Finder):
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'open-url')
+
+
+class EnvironmentFinder(Finder):
+    item_identifier = 'eb'
+    aws_list_function_name = 'get_beanstalk_environments'
+
+    def create_title(self, item):
+        return item['EnvironmentName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['EnvironmentName']))
+
+    health_icons = {
+        'Green': u'🍏',
+        'Yellow': u'🌕',
+        'Red': u'🔴',
+        'Grey': u'⚫',
+    }
+
+    def populate_menu_item(self, wf, env, title, uid, region_name, quicklookurl):
+        url = 'https://%s.console.aws.amazon.com/elasticbeanstalk/home?region=%s#/environment/dashboard?applicationName=%s&environmentId=%s' % (region_name, region_name, env['ApplicationName'], env['EnvironmentId'])
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s; health: %s %s)' % (env['Status'], env['HealthStatus'], self.health_icons[env['Health']]),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/eb_environment.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        load_balancer_url = env.get('EndpointURL', 'N/A')
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='copy load balancer url - %s' % load_balancer_url,
+            arg=load_balancer_url,
+            valid='EndpointURL' in env,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied Load Balancer URL')
+        cmdmod.setvar('notification_text', load_balancer_url)

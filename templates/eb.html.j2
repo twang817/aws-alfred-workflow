@@ -1,0 +1,79 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>ID:</td>
+            <td>{{ eb.EnvironmentId }}</td>
+        </tr>
+        <tr>
+            <td>Application Name:</td>
+            <td>{{ eb.ApplicationName }}</td>
+        </tr>
+        <tr>
+            <td>Description:</td>
+            <td>{{ eb.Description }}</td>
+        </tr>
+        <tr>
+            <td>Status:</td>
+            <td>{{ eb.Status }}</td>
+        </tr>
+        <tr>
+            <td>Health:</td>
+            <td>{{ eb.Health }}</td>
+        </tr>
+        <tr>
+            <td>Health Status:</td>
+            <td>{{ eb.HealthStatus }}</td>
+        </tr>
+        <tr>
+            <td>Date Created:</td>
+            <td>{{ eb.DateCreated }}</td>
+        </tr>
+        <tr>
+            <td>Date Updated:</td>
+            <td>{{ eb.DateUpdated }}</td>
+        </tr>
+        <tr>
+            <td>Endpoint URL:</td>
+            <td>{{ eb.EndpountURL | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Version Label:</td>
+            <td>{{ eb.VersionLabel }}</td>
+        </tr>
+        <tr>
+            <td>Solution Stack Name:</td>
+            <td>{{ eb.SolutionStackName }}</td>
+        </tr>
+        <tr>
+            <td>Template Name:</td>
+            <td>{{ eb.TemplateName | default('N/A') }}</td>
+        </tr>
+        <tr>
+            <td>CNAME:</td>
+            <td>{{ eb.CNAME }}</td>
+        </tr>
+        <tr>
+            <td>Tier Name:</td>
+            <td>{{ eb.Tier.Name }}</td>
+        </tr>
+        <tr>
+            <td>Tier Type:</td>
+            <td>{{ eb.Tier.Type }}</td>
+        </tr>
+        <tr>
+            <td>Tier Version:</td>
+            <td>{{ eb.Tier.Version }}</td>
+        </tr>
+        <tr>
+            <td>Abortable Operation in Progress:</td>
+            <td>{{ eb.AbortableOperationInProgress }}</td>
+        </tr>
+    </table>
+</body>
+</html>

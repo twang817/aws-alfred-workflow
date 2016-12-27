@@ -40,3 +40,10 @@ def test_get_redshift_clusters():
 def test_get_lambda_functions():
     items = get_lambda_functions()
     assert items
+
+
+def test_get_beanstalk_environments():
+    items = get_beanstalk_environments()
+    printer = pprint.PrettyPrinter()
+    printer.pprint(items)
+    assert not items

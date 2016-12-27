@@ -47,6 +47,10 @@ class LambdaQuicklookHandler(BaseHandler):
     template = 'lambda.html.j2'
 
 
+class EbQuicklookHandler(BaseHandler):
+    template = 'eb.html.j2'
+
+
 def make_app():
     return tornado.web.Application([
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'static')}),
@@ -57,6 +61,7 @@ def make_app():
         (r'/quicklook/sqs', SqsQuicklookHandler),
         (r'/quicklook/redshift', RedshiftClusterQuicklookHandler),
         (r'/quicklook/lambda', LambdaQuicklookHandler),
+        (r'/quicklook/eb', EbQuicklookHandler),
     ])
 
 

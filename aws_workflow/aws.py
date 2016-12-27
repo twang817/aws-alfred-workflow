@@ -187,3 +187,15 @@ def get_lambda_functions():
         else:
             break
     return items
+
+
+def get_beanstalk_environments():
+    client = boto3.client('elasticbeanstalk')
+    items = []
+    log.debug('calling describe_environments')
+    response = client.describe_environments()
+    for item in response['Environments']:
+        item['facets'] = {}
+        item['facets']['name'] = item['EnvironmentName']
+        items.append(item)
+    return items
