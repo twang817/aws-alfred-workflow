@@ -358,6 +358,15 @@ class FunctionFinder(Finder):
         )
         item.setvar('action', 'open-url')
 
+        cloudwatch_url = 'https://%s.console.aws.amazon.com/cloudwatch/home?region=%s#logStream:group=/aws/lambda/%s;streamFilter=typeLogStreamPrefix' % (region_name, region_name, title)
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='open cloudwatch log group',
+            arg=cloudwatch_url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'open-url')
+
 
 class EnvironmentFinder(Finder):
     item_identifier = 'eb'
