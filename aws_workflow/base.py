@@ -7,6 +7,7 @@ from six.moves.urllib.parse import urlencode
 
 import workflow
 from workflow.background import run_in_background, is_running
+from workflow import MATCH_ALL, MATCH_ALLCHARS
 
 from .utils import json_serializer
 from .utils import filter_facets
@@ -99,7 +100,7 @@ class Ec2Finder(Finder):
         if len(terms) == 1 and terms[0].startswith('i-'):
             return wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
         elif len(terms) > 0:
-            return wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
+            return wf.filter(' '.join(terms), instances, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda i: i['facets'].get('name', u''))
         return instances
 
     state_icons = {
@@ -157,7 +158,7 @@ class BucketFinder(Finder):
         return bucket['Name']
 
     def filter_items(self, wf, items, terms):
-        return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['Name']))
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['Name']))
 
     def populate_menu_item(self, wf, bucket, title, uid, region_name, quicklookurl):
         item = wf.add_item(
@@ -181,7 +182,7 @@ class DatabaseFinder(Finder):
         return db['facets']['name']
 
     def filter_items(self, wf, items, terms):
-        return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['facets']['name']))
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['facets']['name']))
 
     def populate_menu_item(self, wf, db, title, uid, region_name, quicklookurl):
         if db['type'] == 'instance':
@@ -225,7 +226,7 @@ class StackFinder(Finder):
         return stack['StackName']
 
     def filter_items(self, wf, stacks, terms):
-        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['StackName']))
+        return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['StackName']))
 
     def populate_menu_item(self, wf, stack, title, uid, region_name, quicklookurl):
         url = 'https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stack/detail?stackId=%s' % (region_name, region_name, stack['StackId'])
@@ -253,7 +254,7 @@ class QueueFinder(Finder):
         return queue['QueueName']
 
     def filter_items(self, wf, stacks, terms):
-        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['QueueUrl']))
+        return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['QueueUrl']))
 
     def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl):
         queue_url = queue['QueueUrl']
@@ -291,7 +292,7 @@ class RedshiftClusterFinder(Finder):
         return item['ClusterIdentifier']
 
     def filter_items(self, wf, items, terms):
-        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['ClusterIdentifier']))
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['ClusterIdentifier']))
 
     def populate_menu_item(self, wf, cluster, title, uid, region_name, quicklookurl):
         url = 'https://%s.console.aws.amazon.com/redshift/home?region=%s#cluster-details:cluster=%s' % (region_name, region_name, title)
@@ -341,7 +342,7 @@ class FunctionFinder(Finder):
         return item['FunctionName']
 
     def filter_items(self, wf, items, terms):
-        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['FunctionName']))
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['FunctionName']))
 
     def populate_menu_item(self, wf, function, title, uid, region_name, quicklookurl):
         url = 'https://%s.console.aws.amazon.com/lambda/home?region=%s#/functions/%s?tab=code' % (region_name, region_name, title)
@@ -366,7 +367,7 @@ class EnvironmentFinder(Finder):
         return item['EnvironmentName']
 
     def filter_items(self, wf, items, terms):
-        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['EnvironmentName']))
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['EnvironmentName']))
 
     health_icons = {
         'Green': u'🍏',
