@@ -170,7 +170,7 @@ def wf_commands():
 @pass_wf
 @pass_complete
 def list_profiles(query, wf, complete):
-    '''set the active profile'''
+    '''set the active profile (currently active: %s)'''  # %s will later get hacked to __doc__ in main()
     from six.moves import configparser
     parser = configparser.ConfigParser()
     parser.read(os.path.expanduser('~/.aws/credentials'))
@@ -185,9 +185,9 @@ def list_profiles(query, wf, complete):
             autocomplete=' '.join([complete, profile]),
         )
         item.setvar('action', 'run-script,post-notification')
-        item.setvar('notification_text', 'Selected profile: %s' % profile)
+        item.setvar('notification_title', 'Profile Set')
+        item.setvar('notification_text', 'Now active: %s' % profile)
     wf.send_feedback()
-
 
 @wf_commands.command('clear-cache')
 @click.argument('query', required=False)
@@ -373,6 +373,10 @@ def main():
         },
         help_url='https://github.com/twang817/aws-alfred-workflow/blob/master/README.md',
     )
+
+    # hack to get currently selected profile into `aws >profile` description
+    # http://stackoverflow.com/a/10307738/1899385
+    list_profiles.__doc__ %= wf.settings['profile']
 
     if wf.update_available:
         @wf_commands.command('update')
