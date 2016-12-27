@@ -295,6 +295,8 @@ def aws_console(query, wf, complete, region):
         ConsoleItem('datapipeline', 'Orchestration for Data-Driven Workflows', 'https://console.aws.amazon.com/datapipeline/home?region={region}'.format(region=region), 'icons/services/datapipeline.png'),
         ConsoleItem('es', 'Run and Scale Elasticsearch Clusters', 'https://{region}.console.aws.amazon.com/es/home?region={region}'.format(region=region), 'icons/services/es.png'),
         ConsoleItem('kinesis', 'Work with Real-Time Streaming Data', 'https://{region}.console.aws.amazon.com/kinesis/home?region={region}'.format(region=region), 'icons/services/kinesis.png'),
+        ConsoleItem('kinesisanalytics', 'Analyze streaming data from Amazon Kinesis Firehose and Amazon Kinesis Streams in real-time using SQL.', 'https://{region}.console.aws.amazon.com/kinesisanalytics/home?region={region}'.format(region=region), 'icons/services/kinesisanalytics.png'),
+        ConsoleItem('firehose', 'Collect and stream data for ordered, replayable, real-time processing.', 'https://{region}.console.aws.amazon.com/firehose/home?region={region}'.format(region=region), 'icons/services/firehose.png'),
         ConsoleItem('machinelearning', 'Build Smart Applications Quickly and Easily', 'https://console.aws.amazon.com/machinelearning/home?region={region}'.format(region=region), 'icons/services/machinelearning.png'),
         ConsoleItem('quicksight', 'Fast, easy to use business analytics', 'https://quicksight.aws.amazon.com'.format(region=region), 'icons/services/quicksight.png'),
         ConsoleItem('iot', 'Connect Devices to the Cloud', 'https://{region}.console.aws.amazon.com/iot/home?region={region}'.format(region=region), 'icons/services/iot.png'),
