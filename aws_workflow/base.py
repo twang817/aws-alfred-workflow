@@ -253,7 +253,6 @@ class QueueFinder(Finder):
         return queue['QueueName']
 
     def filter_items(self, wf, stacks, terms):
-        log.warn(stacks)
         return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['QueueUrl']))
 
     def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl):
@@ -282,3 +281,53 @@ class QueueFinder(Finder):
         cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
         cmdmod.setvar('notification_title', 'Copied queue URL')
         cmdmod.setvar('notification_text', queue_url)
+
+
+class RedshiftClusterFinder(Finder):
+    item_identifier = 'redshift'
+    aws_list_function_name = 'get_redshift_clusters'
+
+    def create_title(self, item):
+        return item['ClusterIdentifier']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['ClusterIdentifier']))
+
+    def populate_menu_item(self, wf, cluster, title, uid, region_name, quicklookurl):
+        url = 'https://%s.console.aws.amazon.com/redshift/home?region=%s#cluster-details:cluster=%s' % (region_name, region_name, title)
+        del cluster['ClusterCreateTime'] # TODO
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s)' % cluster['ClusterStatus'],
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/redshift.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        first_node = next(iter(cluster['ClusterNodes']), None)
+
+        private_ip = first_node.get('PrivateIPAddress', 'N/A')
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='copy first node\'s private IP - %s' % private_ip,
+            arg=private_ip,
+            valid=first_node and 'PrivateIPAddress' in first_node,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied Private IP of Redshift Node')
+        cmdmod.setvar('notification_text', '%s of %s' % (private_ip, title))
+
+        public_ip = first_node.get('PublicIPAddress', 'N/A')
+        altmod = item.add_modifier(
+            'alt',
+            subtitle='copy first node\'s public IP - %s' % public_ip,
+            arg=public_ip,
+            valid=first_node and 'PublicIPAddress' in first_node,
+        )
+        altmod.setvar('action', 'copy-to-clipboard,post-notification')
+        altmod.setvar('notification_title', 'Copied Public IP of Redshift Node')
+        altmod.setvar('notification_text', '%s of %s' % (public_ip, title))

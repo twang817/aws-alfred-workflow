@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>DB Name</td>
+            <td>{{ redshift.DBName }}</td>
+        </tr>
+        <tr>
+            <td>Node Type:</td>
+            <td>{{ redshift.NodeType }}</td>
+        </tr>
+        <tr>
+            <td>Cluster Version:</td>
+            <td>{{ redshift.ClusterVersion }}</td>
+        </tr>
+        <tr>
+            <td>Cluster Status:</td>
+            <td>{{ redshift.ClusterStatus }}</td>
+        </tr>
+        <tr>
+            <td>Cluster Nodes:</td>
+            <td>
+                <dl>
+                    {% for node in redshift.ClusterNodes %}
+                    <dt>Public IP:</dt>
+                    <dd>{{ node.PublicIPAddress }}</dd>
+                    <dt>Private IP:</dt>
+                    <dd>{{ node.PrivateIPAddress }}</dd>
+                    <dt>Node Role:</dt>
+                    <dd>{{ node.NodeRole }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+        <tr>
+            <td>Tags:</td>
+            <td>
+                <dl>
+                    {% for tag in redshift.Tags %}
+                    <dt>{{ tag.Key }}</dt>
+                    <dd>{{ tag.Value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

@@ -358,6 +358,7 @@ def search(quicklook_port, query, wf, profile, region):
         StackFinder(),
         BucketFinder(),
         Ec2Finder(),
+        RedshiftClusterFinder(),
     ]
     for finder in finders:
         finder.find(wf, profile, region, terms, facets, quicklook_baseurl)

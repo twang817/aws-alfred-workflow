@@ -147,3 +147,26 @@ def get_sqs_queues():
             finally:
                 queues.append(queue)
     return queues
+
+
+def get_redshift_clusters():
+    client = boto3.client('redshift')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling describe_clusters')
+        response = client.describe_clusters(**next_token)
+        for item in response['Clusters']:
+            item['facets'] = {}
+            item['facets']['name'] = item['DBName']
+            if 'Tags' in item:
+                for tag in item['Tags']:
+                    item['Tag:%s' % tag['Key']] = tag['Value']
+                    item['facets'][tag['Key'].lower()] = tag['Value']
+            items.append(item)
+        if 'Marker' in response:
+            next_token['NextToken'] = response['Marker']
+        else:
+            break
+    return items
+

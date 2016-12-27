@@ -30,3 +30,8 @@ def test_get_sqs_queues():
         assert 'QueueUrl' in queue
 
     assert queues
+
+
+def test_get_redshift_clusters():
+    clusters = get_redshift_clusters()
+    assert clusters

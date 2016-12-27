@@ -62,13 +62,14 @@ To perform a query against your selected profile. Alfred will then auto-populate
 #### Modifier Key Cheat Sheet
 Below is a table describing the currently supported AWS resource lookups and what Alfred will do upon hitting **Enter** when combined with modifier keys:
 
-|                                                             | (none)              | Cmd                 | Alt / Option                      | Ctrl | Shift <sub>(_press_, not hold)</sub> |
-| :---:                                                       | ---                 | ---                 | ---                               | ---  | ---                                  |
-| ![](icons/ec2_instance.png)<br/>EC2                         | Copies _private_ IP | Open in AWS console | Copies _public_ IP (if available) |      | Quicklook                            |
-| ![](icons/s3_bucket.png)<br/>S3                             | Open in AWS Console |                     |                                   |      | Quicklook                            |
-| ![](icons/db_instance.png)![](icons/db_cluster.png)<br/>RDS | Copy endpoint URL   | Open in AWS Console |                                   |      | Quicklook                            |
-| ![](icons/cfn_stack.png)CloudFormation                      | Open in AWS console |                     |                                   |      | Quicklook                            |
-| ![](icons/sqs_queue.png)<br/>SQS                            | Open in AWS console | Copy queue URL      |                                   |      | Quicklook                            |
+|                                                             | (none)                      | Cmd                                             | Alt / Option | Ctrl | Shift <sub>(_press_, not hold)</sub> |
+| :---:                                                       | ---                         | ---                                             | ---        | ---  | ---                                  |
+| ![](icons/cfn_stack.png)CloudFormation                      | Open stack in AWS console   |                                                 |            |      | Quicklook                            |
+| ![](icons/ec2_instance.png)<br/>EC2                         | Copies _private_ IP         | Open instance in AWS console                    | Copies _public_ IP (if available) |      | Quicklook                            |
+| ![](icons/db_instance.png)![](icons/db_cluster.png)<br/>RDS | Copy endpoint URL           | Open cluster or node in AWS Console             |                                          |      | Quicklook                            |
+| ![](icons/services/redshift.png)<br/>Redshift               | Open cluster in AWS console | Copies first node's _private_ IP (if available) | Copies first node's _public_ IP (if available)    |      | Quicklook                            |
+| ![](icons/s3_bucket.png)<br/>S3                             | Open bucket in AWS Console  |                                                 |            |      | Quicklook                            |
+| ![](icons/sqs_queue.png)<br/>SQS                            | Open queue in AWS console   | Copy queue URL                                  |                         |      | Quicklook                            |
 
 ... more resources and modifiers to be implemented. Feel free to [fork this repo](#fork-destination-box) to implement your own!
 
