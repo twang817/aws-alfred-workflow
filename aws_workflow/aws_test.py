@@ -35,3 +35,8 @@ def test_get_sqs_queues():
 def test_get_redshift_clusters():
     clusters = get_redshift_clusters()
     assert clusters
+
+
+def test_get_lambda_functions():
+    items = get_lambda_functions()
+    assert items

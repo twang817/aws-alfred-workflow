@@ -1,0 +1,84 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td>{{ lambda.FunctionName}}</td>
+        </tr>
+        <tr>
+            <td>Description:</td>
+            <td>{{ lambda.Description }}</td>
+        </tr>
+        <tr>
+            <td>ARN:</td>
+            <td>{{ lambda.FunctionArn }}</td>
+        </tr>
+        <tr>
+            <td>Version:</td>
+            <td>{{ lambda.Version}}</td>
+        </tr>
+        <tr>
+            <td>Last Modified:</td>
+            <td>{{ lambda.LastModified }}</td>
+        </tr>
+        {% if 'Environment' in lambda and 'Error' in lambda.Environment %}
+          <tr>
+              <td>Error Status:</td>
+              <td>{{ lambda.Environment.Error.ErrorCode }} - {{ lambda.Environment.Error.Message }}</td>
+          </tr>
+        {% endif %}
+        <tr>
+            <td>Runtime:</td>
+            <td>{{ lambda.Runtime }}</td>
+        </tr>
+        <tr>
+            <td>Role:</td>
+            <td>{{ lambda.Role }}</td>
+        </tr>
+        <tr>
+            <td>Handler:</td>
+            <td>{{ lambda.Handler }}</td>
+        </tr>
+        <tr>
+            <td>Timeout:</td>
+            <td>{{ lambda.Timeout }} seconds</td>
+        </tr>
+        <tr>
+            <td>Memory Size:</td>
+            <td>{{ lambda.MemorySize }}MB</td>
+        </tr>
+        <tr>
+            <td>Code SHA256:</td>
+            <td>{{ lambda.CodeSha256 }}</td>
+        </tr>
+        <tr>
+            <td>MKS Key ARN:</td>
+            <td>{{ lambda.KMSKeyArn | default('N/A') }}</td>
+        </tr>
+        {% if 'DeadLetterConfig' in lambda %}
+        <tr>
+            <td>Dead Letter Target ARN:</td>
+            <td>{{ lambda.DeadLetterConfig.TargetArn | default('N/A') }}</td>
+        </tr>
+        {% endif %}
+        {% if 'Environment' in lambda and 'Variables' in lambda.Environment %}
+        <tr>
+            <td>Environment:</td>
+            <td>
+                <dl>
+                    {% for key, value in lambda.Environment.Variables.items() %}
+                    <dt>{{ key }}</dt>
+                    <dd>{{ value }}</dd>
+                    {% endfor %}
+                </dl>
+            </td>
+        </tr>
+        {% endif %}
+    </table>
+</body>
+</html>

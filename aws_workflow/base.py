@@ -331,3 +331,28 @@ class RedshiftClusterFinder(Finder):
         altmod.setvar('action', 'copy-to-clipboard,post-notification')
         altmod.setvar('notification_title', 'Copied Public IP of Redshift Node')
         altmod.setvar('notification_text', '%s of %s' % (public_ip, title))
+
+
+class FunctionFinder(Finder):
+    item_identifier = 'lambda'
+    aws_list_function_name = 'get_lambda_functions'
+
+    def create_title(self, item):
+        return item['FunctionName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, key=lambda item: unicode(item['FunctionName']))
+
+    def populate_menu_item(self, wf, function, title, uid, region_name, quicklookurl):
+        url = 'https://%s.console.aws.amazon.com/lambda/home?region=%s#/functions/%s?tab=code' % (region_name, region_name, title)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (runtime: %s)' % function.get('Runtime', 'N/A'),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/lambda.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')

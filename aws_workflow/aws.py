@@ -170,3 +170,20 @@ def get_redshift_clusters():
             break
     return items
 
+
+def get_lambda_functions():
+    client = boto3.client('lambda')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling list_functions')
+        response = client.list_functions(**next_token)
+        for item in response['Functions']:
+            item['facets'] = {}
+            item['facets']['name'] = item['FunctionName']
+            items.append(item)
+        if 'NextMarker' in response:
+            next_token['NextToken'] = response['NextMarker']
+        else:
+            break
+    return items
