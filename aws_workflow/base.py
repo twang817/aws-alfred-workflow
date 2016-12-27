@@ -16,7 +16,7 @@ from .utils import create_stack_status_icons
 log = logging.getLogger()
 
 
-def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
+def _get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
     data_name = '%s-%s-%s' % (profile, region, name)
     data = wf.cached_data(data_name, max_age=0)
 
@@ -36,57 +36,66 @@ def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
     return data
 
 
-def helper(item_identifier, aws_list_function_name):
-    def decorator(func):
-        def wrapper(wf, profile, region_name, terms, facets, quicklook_baseurl):
-            functions = func()
+class Finder:
+    item_identifier = None
+    aws_list_function_name = None
 
-            objects = get_cached_data(
-                wf, profile, region_name, item_identifier,
-                max_age=3600,
-                cmdline=[
-                    '/usr/bin/env',
-                    'python',
-                    wf.workflowfile('aws.py'),
-                    'background',
-                    aws_list_function_name,
-                ])
+    def create_title(self, obj):
+        raise NotImplementedError
 
-            if not objects:
-                return
+    def filter_items(self, wf, objects, terms):
+        raise NotImplementedError
 
-            if terms:
-                objects = functions['filter_items'](wf, objects, terms)
-            objects = filter_facets(wf, objects, facets)
+    def populate_menu_item(self, wf, obj, title, uid, region_name, quicklookurl):
+        raise NotImplementedError
 
-            for object in objects:
-                title = functions['create_title'](object)
-                uid = '%s-%s-%s' % (profile, item_identifier, title)
-                if quicklook_baseurl is not None:
-                    quicklookurl = '%s/%s?%s' % (quicklook_baseurl, item_identifier, urlencode({
-                        'template': item_identifier,
-                        'context': json.dumps({
-                            'title': title,
-                            'uid': uid,
-                            item_identifier: object,
-                        }, default=json_serializer)
-                    }))
-                else:
-                    quicklookurl = None
+    def find(self, wf, profile, region_name, terms, facets, quicklook_baseurl):
+        objects = _get_cached_data(
+            wf, profile, region_name, self.item_identifier,
+            max_age=3600,
+            cmdline=[
+                '/usr/bin/env',
+                'python',
+                wf.workflowfile('aws.py'),
+                'background',
+                self.aws_list_function_name,
+            ])
 
-                functions['populate_menu_item'](wf, object, title, uid, region_name, quicklookurl)
-        return wrapper
-    return decorator
+        if not objects:
+            return
+
+        if terms:
+            objects = self.filter_items(wf, objects, terms)
+        objects = filter_facets(wf, objects, facets)
+
+        for obj in objects:
+            title = self.create_title(obj)
+            uid = '%s-%s-%s' % (profile, self.item_identifier, title)
+            if quicklook_baseurl is not None:
+                quicklookurl = '%s/%s?%s' % (quicklook_baseurl, self.item_identifier, urlencode({
+                    'template': self.item_identifier,
+                    'context': json.dumps({
+                        'title': title,
+                        'uid': uid,
+                        self.item_identifier: obj,
+                    }, default=json_serializer)
+                }))
+            else:
+                quicklookurl = None
+
+            self.populate_menu_item(wf, obj, title, uid, region_name, quicklookurl)
 
 
-@helper(item_identifier='ec2', aws_list_function_name='get_ec2_instances')
-def find_ec2():
-    def create_title(instance):
+class Ec2Finder(Finder):
+    item_identifier = 'ec2'
+    aws_list_function_name = 'get_ec2_instances'
+
+    def create_title(self, instance):
         if 'Tag:Name' in instance:
             return '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
         return instance['InstanceId']
 
-    def filter_items(wf, instances, terms):
+    def filter_items(self, wf, instances, terms):
         if len(terms) == 1 and terms[0].startswith('i-'):
             return wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
         elif len(terms) > 0:
@@ -103,10 +112,10 @@ def find_ec2():
         'shutting-down': '💣',
     }
 
-    def populate_menu_item(wf, instance, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, instance, title, uid, region_name, quicklookurl):
         state = instance['State']['Name']
         valid = state == 'running'
-        state_icon = state_icons.get(state, '❔')
+        state_icon = self.state_icons.get(state, '❔')
         private_ip = instance.get('PrivateIpAddress', 'N/A')
         item = wf.add_item(
             title,
@@ -139,22 +148,18 @@ def find_ec2():
         )
         cmdmod.setvar('action', 'open-url')
 
-    return {
-        'create_title': create_title,
-        'filter_items': filter_items,
-        'populate_menu_item': populate_menu_item
-    }
 
+class BucketFinder(Finder):
+    item_identifier = 's3'
+    aws_list_function_name = 'get_s3_buckets'
 
-@helper(item_identifier='s3', aws_list_function_name='get_s3_buckets')
-def find_s3_bucket():
-    def create_title(bucket):
+    def create_title(self, bucket):
         return bucket['Name']
 
-    def filter_items(wf, items, terms):
+    def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['Name']))
 
-    def populate_menu_item(wf, bucket, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, bucket, title, uid, region_name, quicklookurl):
         item = wf.add_item(
             title,
             subtitle='open in AWS console',
@@ -167,22 +172,18 @@ def find_s3_bucket():
         )
         item.setvar('action', 'open-url')
 
-    return {
-        'create_title': create_title,
-        'filter_items': filter_items,
-        'populate_menu_item': populate_menu_item
-    }
 
+class DatabaseFinder(Finder):
+    item_identifier = 'rds'
+    aws_list_function_name = 'get_rds_instances'
 
-@helper(item_identifier='rds', aws_list_function_name='get_rds_instances')
-def find_database():
-    def create_title(db):
+    def create_title(self, db):
         return db['facets']['name']
 
-    def filter_items(wf, items, terms):
+    def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, key=lambda b: unicode(b['facets']['name']))
 
-    def populate_menu_item(wf, db, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, db, title, uid, region_name, quicklookurl):
         if db['type'] == 'instance':
             db_id = db['DBInstanceIdentifier']
             icon = 'icons/db_instance.png'
@@ -213,28 +214,24 @@ def find_database():
         )
         cmdmod.setvar('action', 'open-url')
 
-    return {
-        'create_title': create_title,
-        'filter_items': filter_items,
-        'populate_menu_item': populate_menu_item
-    }
 
-
-@helper(item_identifier='cfn', aws_list_function_name='get_cfn_stacks')
-def find_stack():
-    def create_title(stack):
-        return stack['StackName']
-
-    def filter_items(wf, stacks, terms):
-        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['StackName']))
+class StackFinder(Finder):
+    item_identifier = 'cfn'
+    aws_list_function_name = 'get_cfn_stacks'
 
     stack_status_icons = create_stack_status_icons()
 
-    def populate_menu_item(wf, stack, title, uid, region_name, quicklookurl):
+    def create_title(self, stack):
+        return stack['StackName']
+
+    def filter_items(self, wf, stacks, terms):
+        return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['StackName']))
+
+    def populate_menu_item(self, wf, stack, title, uid, region_name, quicklookurl):
         url = 'https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stack/detail?stackId=%s' % (region_name, region_name, stack['StackId'])
 
         status = stack['StackStatus']
-        stack_status_icon = stack_status_icons.get(status, '')
+        stack_status_icon = self.stack_status_icons.get(status, '')
         item = wf.add_item(
             title,
             subtitle='open in AWS console (status: %s %s)' % (status, stack_status_icon),
@@ -247,23 +244,19 @@ def find_stack():
         )
         item.setvar('action', 'open-url')
 
-    return {
-        'create_title': create_title,
-        'filter_items': filter_items,
-        'populate_menu_item': populate_menu_item
-    }
 
+class QueueFinder(Finder):
+    item_identifier = 'sqs'
+    aws_list_function_name = 'get_sqs_queues'
 
-@helper(item_identifier='sqs', aws_list_function_name='get_sqs_queues')
-def find_queue():
-    def create_title(queue):
+    def create_title(self, queue):
         return queue['QueueName']
 
-    def filter_items(wf, stacks, terms):
+    def filter_items(self, wf, stacks, terms):
         log.warn(stacks)
         return wf.filter(' '.join(terms), stacks, key=lambda stack: unicode(stack['QueueUrl']))
 
-    def populate_menu_item(wf, queue, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl):
         queue_url = queue['QueueUrl']
         # aws console doesn't use the actual queue url attribute for its query parameters, so manually construct it
         formatted_queue_url = 'https://sqs.%s.amazonaws.com%s' % (region_name, queue_url.split('amazonaws.com')[-1])
@@ -289,10 +282,3 @@ def find_queue():
         cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
         cmdmod.setvar('notification_title', 'Copied queue URL')
         cmdmod.setvar('notification_text', queue_url)
-
-    return {
-        'create_title': create_title,
-        'filter_items': filter_items,
-        'populate_menu_item': populate_menu_item
-    }
-

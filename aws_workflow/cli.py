@@ -7,11 +7,7 @@ import workflow
 from workflow.background import run_in_background, is_running
 
 from . import aws
-from .base import find_ec2
-from .base import find_s3_bucket
-from .base import find_database
-from .base import find_stack
-from .base import find_queue
+from .base import *
 from .utils import (
     autocomplete_group,
     get_profile,
@@ -357,14 +353,14 @@ def search(quicklook_port, query, wf, profile, region):
 
     terms, facets = parse_query(query)
     finders = [
-        find_ec2,
-        find_s3_bucket,
-        find_database,
-        find_stack,
-        find_queue,
+        DatabaseFinder(),
+        QueueFinder(),
+        StackFinder(),
+        BucketFinder(),
+        Ec2Finder(),
     ]
     for finder in finders:
-        finder(wf, profile, region, terms, facets, quicklook_baseurl)
+        finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
 
     wf.send_feedback()
 
