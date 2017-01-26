@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>ARN:</td>
+            <td>{{ logs.arn }}</td>
+        </tr>
+        <tr>
+            <td>Creation Time</td>
+            <td>{{ logs.creationTime }}</td>
+        </tr>
+        <tr>
+            <td>Metric Filter Count</td>
+            <td>{{ logs.metricFilterCount }}</td>
+        </tr>
+        <tr>
+            <td>Retention in Days</td>
+            <td>{{ logs.retentionInDays }}</td>
+        </tr>
+        <tr>
+            <td>Stored Bytes</td>
+            <td>{{ logs.storedBytes }}</td>
+        </tr>
+    </table>
+</body>
+</html>
+

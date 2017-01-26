@@ -84,7 +84,7 @@ class Finder:
             else:
                 quicklookurl = None
 
-            self.populate_menu_item(wf, obj, title, uid, region_name, quicklookurl)
+            self.populate_menu_item(wf, obj, title, uid, region_name, quicklookurl, profile)
 
 
 class Ec2Finder(Finder):
@@ -113,7 +113,7 @@ class Ec2Finder(Finder):
         'shutting-down': '💣',
     }
 
-    def populate_menu_item(self, wf, instance, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, instance, title, uid, region_name, quicklookurl, profile):
         state = instance['State']['Name']
         valid = state == 'running'
         state_icon = self.state_icons.get(state, '❔')
@@ -160,7 +160,7 @@ class BucketFinder(Finder):
     def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['Name']))
 
-    def populate_menu_item(self, wf, bucket, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, bucket, title, uid, region_name, quicklookurl, profile):
         item = wf.add_item(
             title,
             subtitle='open in AWS console',
@@ -184,7 +184,7 @@ class DatabaseFinder(Finder):
     def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['facets']['name']))
 
-    def populate_menu_item(self, wf, db, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, db, title, uid, region_name, quicklookurl, profile):
         if db['type'] == 'instance':
             db_id = db['DBInstanceIdentifier']
             icon = 'icons/db_instance.png'
@@ -228,7 +228,7 @@ class StackFinder(Finder):
     def filter_items(self, wf, stacks, terms):
         return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['StackName']))
 
-    def populate_menu_item(self, wf, stack, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, stack, title, uid, region_name, quicklookurl, profile):
         url = 'https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stack/detail?stackId=%s' % (region_name, region_name, stack['StackId'])
 
         status = stack['StackStatus']
@@ -256,7 +256,7 @@ class QueueFinder(Finder):
     def filter_items(self, wf, stacks, terms):
         return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['QueueUrl']))
 
-    def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl, profile):
         queue_url = queue['QueueUrl']
         # aws console doesn't use the actual queue url attribute for its query parameters, so manually construct it
         formatted_queue_url = 'https://sqs.%s.amazonaws.com%s' % (region_name, queue_url.split('amazonaws.com')[-1])
@@ -294,7 +294,7 @@ class RedshiftClusterFinder(Finder):
     def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['ClusterIdentifier']))
 
-    def populate_menu_item(self, wf, cluster, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, cluster, title, uid, region_name, quicklookurl, profile):
         url = 'https://%s.console.aws.amazon.com/redshift/home?region=%s#cluster-details:cluster=%s' % (region_name, region_name, title)
         del cluster['ClusterCreateTime'] # TODO
         item = wf.add_item(
@@ -344,7 +344,7 @@ class FunctionFinder(Finder):
     def filter_items(self, wf, items, terms):
         return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['FunctionName']))
 
-    def populate_menu_item(self, wf, function, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, function, title, uid, region_name, quicklookurl, profile):
         url = 'https://%s.console.aws.amazon.com/lambda/home?region=%s#/functions/%s?tab=code' % (region_name, region_name, title)
         item = wf.add_item(
             title,
@@ -385,7 +385,7 @@ class EnvironmentFinder(Finder):
         'Grey': u'⚫',
     }
 
-    def populate_menu_item(self, wf, env, title, uid, region_name, quicklookurl):
+    def populate_menu_item(self, wf, env, title, uid, region_name, quicklookurl, profile):
         url = 'https://%s.console.aws.amazon.com/elasticbeanstalk/home?region=%s#/environment/dashboard?applicationName=%s&environmentId=%s' % (region_name, region_name, env['ApplicationName'], env['EnvironmentId'])
         item = wf.add_item(
             title,
@@ -409,3 +409,42 @@ class EnvironmentFinder(Finder):
         cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
         cmdmod.setvar('notification_title', 'Copied Load Balancer URL')
         cmdmod.setvar('notification_text', load_balancer_url)
+
+
+class LogGroupFinder(Finder):
+    item_identifier = 'logs'
+    aws_list_function_name = 'get_cloudwatch_log_groups'
+
+    def create_title(self, item):
+        return item['logGroupName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['logGroupName']))
+
+    def populate_menu_item(self, wf, group, title, uid, region_name, quicklookurl, profile):
+        group_name = self.create_title(group)
+        url = 'https://%s.console.aws.amazon.com/cloudwatch/home?region=%s#logEventViewer:group=%s;start=P1D' % (region_name, region_name, group_name)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console',
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/cloudwatch.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        awslogs_command = 'awslogs get %s -w --aws_region %s --profile %s' % (group_name, region_name, profile)
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='copy `awslogs` tail command to clipboard',
+            arg=awslogs_command,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied to Clipboard')
+        cmdmod.setvar('notification_text', awslogs_command)
+
+

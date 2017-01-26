@@ -44,6 +44,9 @@ def test_get_lambda_functions():
 
 def test_get_beanstalk_environments():
     items = get_beanstalk_environments()
-    printer = pprint.PrettyPrinter()
-    printer.pprint(items)
-    assert not items
+    assert items
+
+
+def test_get_cloudwatch_log_groups():
+    items = get_cloudwatch_log_groups()
+    assert items

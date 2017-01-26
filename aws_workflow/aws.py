@@ -199,3 +199,21 @@ def get_beanstalk_environments():
         item['facets']['name'] = item['EnvironmentName']
         items.append(item)
     return items
+
+
+def get_cloudwatch_log_groups():
+    client = boto3.client('logs')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling cloudwatch_streams')
+        response = client.describe_log_groups(**next_token)
+        for item in response['logGroups']:
+            item['facets'] = {}
+            item['facets']['name'] = item['logGroupName']
+            items.append(item)
+        if 'nextToken' in response:
+            next_token['nextToken'] = response['nextToken']
+        else:
+            break
+    return items

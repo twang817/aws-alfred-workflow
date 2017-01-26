@@ -164,6 +164,17 @@ def root(ctx, query):
 def wf_commands():
     '''run a workflow command'''
 
+@root.group('@')
+def resource_commands():
+    '''search within a particular resource'''
+
+@resource_commands.command('ec2')
+@click.argument('query', required=False)
+@pass_wf
+@pass_complete
+def hooray(query, wf, complete):
+    '''set the active profile (currently active: )'''
+    wf.send_feedback()
 
 @wf_commands.command('profile')
 @click.argument('query', required=False)
@@ -280,6 +291,8 @@ def aws_console(query, wf, complete, region):
         ConsoleItem('codedeploy', 'Automate Code Deployments', 'https://{region}.console.aws.amazon.com/codedeploy/home?region={region}'.format(region=region), 'icons/services/codedeploy.png'),
         ConsoleItem('codepipeline', 'Release Software using Continuous Delivery', 'https://{region}.console.aws.amazon.com/codepipeline/home?region={region}'.format(region=region), 'icons/services/codepipeline.png'),
         ConsoleItem('cloudwatch', 'Monitor Resources and Applications', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}'.format(region=region), 'icons/services/cloudwatch.png'),
+        ConsoleItem('cloudwatchlogs', 'Monitor Logs', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logs:'.format(region=region), 'icons/services/cloudwatch.png'),
+        ConsoleItem('cloudwatchalarms', 'Monitor Alarms', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#alarm:'.format(region=region), 'icons/services/cloudwatch.png'),
         ConsoleItem('cloudformation', 'Create and Manage Resources with Templates', 'https://{region}.console.aws.amazon.com/cloudformation/home?region={region}'.format(region=region), 'icons/services/cloudformation.png'),
         ConsoleItem('cloudtrail', 'Track User Activity and API Usage', 'https://{region}.console.aws.amazon.com/cloudtrail/home?region={region}'.format(region=region), 'icons/services/cloudtrail.png'),
         ConsoleItem('config', 'Track Resource Inventory and Changes', 'https://{region}.console.aws.amazon.com/config/home?region={region}'.format(region=region), 'icons/services/config.png'),
@@ -363,6 +376,7 @@ def search(quicklook_port, query, wf, profile, region):
         RedshiftClusterFinder(),
         FunctionFinder(),
         EnvironmentFinder(),
+        LogGroupFinder(),
     ]
     for finder in finders:
         finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
