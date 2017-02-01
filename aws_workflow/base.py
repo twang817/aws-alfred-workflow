@@ -439,12 +439,18 @@ class LogGroupFinder(Finder):
         awslogs_command = 'awslogs get %s -w --aws_region %s --profile %s' % (group_name, region_name, profile)
         cmdmod = item.add_modifier(
             'cmd',
+            subtitle='execute `awslogs` tail command in terminal',
+            arg=awslogs_command,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'execute-terminal')
+
+        altmod = item.add_modifier(
+            'alt',
             subtitle='copy `awslogs` tail command to clipboard',
             arg=awslogs_command,
             valid=True,
         )
-        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
-        cmdmod.setvar('notification_title', 'Copied to Clipboard')
-        cmdmod.setvar('notification_text', awslogs_command)
-
-
+        altmod.setvar('action', 'copy-to-clipboard,post-notification')
+        altmod.setvar('notification_title', 'Copied `awslogs` Command')
+        altmod.setvar('notification_text', awslogs_command)
