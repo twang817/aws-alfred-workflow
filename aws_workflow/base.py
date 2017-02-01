@@ -39,6 +39,7 @@ def _get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
 
 class Finder:
     item_identifier = None
+    pretty_name = None
     aws_list_function_name = None
 
     def create_title(self, obj):
@@ -89,6 +90,7 @@ class Finder:
 
 class Ec2Finder(Finder):
     item_identifier = 'ec2'
+    pretty_name = 'EC2 Instance'
     aws_list_function_name = 'get_ec2_instances'
 
     def create_title(self, instance):
@@ -152,6 +154,7 @@ class Ec2Finder(Finder):
 
 class BucketFinder(Finder):
     item_identifier = 's3'
+    pretty_name = 'S3 Bucket'
     aws_list_function_name = 'get_s3_buckets'
 
     def create_title(self, bucket):
@@ -176,6 +179,7 @@ class BucketFinder(Finder):
 
 class DatabaseFinder(Finder):
     item_identifier = 'rds'
+    pretty_name = 'RDS Database'
     aws_list_function_name = 'get_rds_instances'
 
     def create_title(self, db):
@@ -218,6 +222,7 @@ class DatabaseFinder(Finder):
 
 class StackFinder(Finder):
     item_identifier = 'cfn'
+    pretty_name = 'CloudFormation Stack'
     aws_list_function_name = 'get_cfn_stacks'
 
     stack_status_icons = create_stack_status_icons()
@@ -248,6 +253,7 @@ class StackFinder(Finder):
 
 class QueueFinder(Finder):
     item_identifier = 'sqs'
+    pretty_name = 'SQS Queue'
     aws_list_function_name = 'get_sqs_queues'
 
     def create_title(self, queue):
@@ -286,6 +292,7 @@ class QueueFinder(Finder):
 
 class RedshiftClusterFinder(Finder):
     item_identifier = 'redshift'
+    pretty_name = 'Redshift Cluster'
     aws_list_function_name = 'get_redshift_clusters'
 
     def create_title(self, item):
@@ -336,6 +343,7 @@ class RedshiftClusterFinder(Finder):
 
 class FunctionFinder(Finder):
     item_identifier = 'lambda'
+    pretty_name = 'Lambda Function'
     aws_list_function_name = 'get_lambda_functions'
 
     def create_title(self, item):
@@ -370,6 +378,7 @@ class FunctionFinder(Finder):
 
 class EnvironmentFinder(Finder):
     item_identifier = 'eb'
+    pretty_name = 'ElasticBeanstalk Environment'
     aws_list_function_name = 'get_beanstalk_environments'
 
     def create_title(self, item):
@@ -413,6 +422,7 @@ class EnvironmentFinder(Finder):
 
 class LogGroupFinder(Finder):
     item_identifier = 'logs'
+    pretty_name = 'CloudWatch Log Group'
     aws_list_function_name = 'get_cloudwatch_log_groups'
 
     def create_title(self, item):

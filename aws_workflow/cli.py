@@ -47,6 +47,18 @@ ensure_default_command = make_pass_decorator('default_command', ensure=True, fac
 ensure_profile = make_pass_decorator('profile', ensure=True, factory=get_profile)
 ensure_region = make_pass_decorator('region', ensure=True, factory=get_region)
 
+finders = [
+    DatabaseFinder(),
+    QueueFinder(),
+    StackFinder(),
+    BucketFinder(),
+    Ec2Finder(),
+    RedshiftClusterFinder(),
+    FunctionFinder(),
+    EnvironmentFinder(),
+    LogGroupFinder(),
+]
+
 
 @click.group()
 def cli():
@@ -168,13 +180,22 @@ def wf_commands():
 def resource_commands():
     '''search within a particular resource'''
 
-@resource_commands.command('ec2')
-@click.argument('query', required=False)
-@pass_wf
-@pass_complete
-def hooray(query, wf, complete):
-    '''set the active profile (currently active: )'''
-    wf.send_feedback()
+def create_resource_finder(finder):
+    @resource_commands.command(finder.item_identifier)
+    @click.argument('query')
+    @pass_wf
+    @ensure_profile
+    @ensure_region
+    def resource_finder(query, wf, profile, region):
+        terms, facets = parse_query(query)
+        finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
+        wf.send_feedback()
+
+    resource_finder.__doc__ = '''search for %ss''' % finder.pretty_name
+
+for finder in finders:
+    create_resource_finder(finder)
+
 
 @wf_commands.command('profile')
 @click.argument('query', required=False)
@@ -345,6 +366,7 @@ def aws_console(query, wf, complete, region):
     wf.send_feedback()
 
 
+quicklook_baseurl = None
 
 @click.command()
 @click.option('--quicklook_port', envvar='WF_QUICKLOOK_PORT')
@@ -353,7 +375,6 @@ def aws_console(query, wf, complete, region):
 @ensure_profile
 @ensure_region
 def search(quicklook_port, query, wf, profile, region):
-    quicklook_baseurl = None
     if quicklook_port is not None:
         if not is_running('quicklook'):
             log.info('\n'.join('%s = %s' % (k, v) for k, v in os.environ.items()))
@@ -367,17 +388,6 @@ def search(quicklook_port, query, wf, profile, region):
         quicklook_baseurl = 'http://localhost:%s/quicklook' % quicklook_port
 
     terms, facets = parse_query(query)
-    finders = [
-        DatabaseFinder(),
-        QueueFinder(),
-        StackFinder(),
-        BucketFinder(),
-        Ec2Finder(),
-        RedshiftClusterFinder(),
-        FunctionFinder(),
-        EnvironmentFinder(),
-        LogGroupFinder(),
-    ]
     for finder in finders:
         finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
 
