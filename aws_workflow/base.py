@@ -398,7 +398,7 @@ class EnvironmentFinder(Finder):
         url = 'https://%s.console.aws.amazon.com/elasticbeanstalk/home?region=%s#/environment/dashboard?applicationName=%s&environmentId=%s' % (region_name, region_name, env['ApplicationName'], env['EnvironmentId'])
         item = wf.add_item(
             title,
-            subtitle='open in AWS console (status: %s; health: %s %s)' % (env['Status'], env['HealthStatus'], self.health_icons[env['Health']]),
+            subtitle='open in AWS console (status: %s; health: %s %s)' % (env.get('Status'), env.get('HealthStatus'), self.health_icons.get(env.get('Health'))),
             arg=url,
             valid=True,
             uid=uid,
