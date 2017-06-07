@@ -7,9 +7,7 @@ import workflow
 from workflow.background import run_in_background, is_running
 
 from . import aws
-from .base import find_ec2
-from .base import find_s3_bucket
-from .base import find_database
+from .base import *
 from .utils import (
     autocomplete_group,
     get_profile,
@@ -48,6 +46,18 @@ pass_complete = make_pass_decorator('complete')
 ensure_default_command = make_pass_decorator('default_command', ensure=True, factory=lambda: search)
 ensure_profile = make_pass_decorator('profile', ensure=True, factory=get_profile)
 ensure_region = make_pass_decorator('region', ensure=True, factory=get_region)
+
+finders = [
+    DatabaseFinder(),
+    QueueFinder(),
+    StackFinder(),
+    BucketFinder(),
+    Ec2Finder(),
+    RedshiftClusterFinder(),
+    FunctionFinder(),
+    EnvironmentFinder(),
+    LogGroupFinder(),
+]
 
 
 @click.group()
@@ -166,13 +176,33 @@ def root(ctx, query):
 def wf_commands():
     '''run a workflow command'''
 
+@root.group('@')
+def resource_commands():
+    '''search within a particular resource'''
+
+def create_resource_finder(finder):
+    @resource_commands.command(finder.item_identifier)
+    @click.argument('query')
+    @pass_wf
+    @ensure_profile
+    @ensure_region
+    def resource_finder(query, wf, profile, region):
+        terms, facets = parse_query(query)
+        finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
+        wf.send_feedback()
+
+    resource_finder.__doc__ = '''search for %ss''' % finder.pretty_name
+
+for finder in finders:
+    create_resource_finder(finder)
+
 
 @wf_commands.command('profile')
 @click.argument('query', required=False)
 @pass_wf
 @pass_complete
 def list_profiles(query, wf, complete):
-    '''set the active profile'''
+    '''set the active profile (currently active: %s)'''  # %s will later get hacked to __doc__ in main()
     from six.moves import configparser
     parser = configparser.ConfigParser()
     parser.read(os.path.expanduser('~/.aws/credentials'))
@@ -187,9 +217,9 @@ def list_profiles(query, wf, complete):
             autocomplete=' '.join([complete, profile]),
         )
         item.setvar('action', 'run-script,post-notification')
-        item.setvar('notification_text', 'Selected profile: %s' % profile)
+        item.setvar('notification_title', 'Profile Set')
+        item.setvar('notification_text', 'Now active: %s' % profile)
     wf.send_feedback()
-
 
 @wf_commands.command('clear-cache')
 @click.argument('query', required=False)
@@ -282,6 +312,8 @@ def aws_console(query, wf, complete, region):
         ConsoleItem('codedeploy', 'Automate Code Deployments', 'https://{region}.console.aws.amazon.com/codedeploy/home?region={region}'.format(region=region), 'icons/services/codedeploy.png'),
         ConsoleItem('codepipeline', 'Release Software using Continuous Delivery', 'https://{region}.console.aws.amazon.com/codepipeline/home?region={region}'.format(region=region), 'icons/services/codepipeline.png'),
         ConsoleItem('cloudwatch', 'Monitor Resources and Applications', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}'.format(region=region), 'icons/services/cloudwatch.png'),
+        ConsoleItem('cloudwatchlogs', 'Monitor Logs', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logs:'.format(region=region), 'icons/services/cloudwatch.png'),
+        ConsoleItem('cloudwatchalarms', 'Monitor Alarms', 'https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#alarm:'.format(region=region), 'icons/services/cloudwatch.png'),
         ConsoleItem('cloudformation', 'Create and Manage Resources with Templates', 'https://{region}.console.aws.amazon.com/cloudformation/home?region={region}'.format(region=region), 'icons/services/cloudformation.png'),
         ConsoleItem('cloudtrail', 'Track User Activity and API Usage', 'https://{region}.console.aws.amazon.com/cloudtrail/home?region={region}'.format(region=region), 'icons/services/cloudtrail.png'),
         ConsoleItem('config', 'Track Resource Inventory and Changes', 'https://{region}.console.aws.amazon.com/config/home?region={region}'.format(region=region), 'icons/services/config.png'),
@@ -297,6 +329,8 @@ def aws_console(query, wf, complete, region):
         ConsoleItem('datapipeline', 'Orchestration for Data-Driven Workflows', 'https://console.aws.amazon.com/datapipeline/home?region={region}'.format(region=region), 'icons/services/datapipeline.png'),
         ConsoleItem('es', 'Run and Scale Elasticsearch Clusters', 'https://{region}.console.aws.amazon.com/es/home?region={region}'.format(region=region), 'icons/services/es.png'),
         ConsoleItem('kinesis', 'Work with Real-Time Streaming Data', 'https://{region}.console.aws.amazon.com/kinesis/home?region={region}'.format(region=region), 'icons/services/kinesis.png'),
+        ConsoleItem('kinesisanalytics', 'Analyze streaming data from Amazon Kinesis Firehose and Amazon Kinesis Streams in real-time using SQL.', 'https://{region}.console.aws.amazon.com/kinesisanalytics/home?region={region}'.format(region=region), 'icons/services/kinesisanalytics.png'),
+        ConsoleItem('firehose', 'Collect and stream data for ordered, replayable, real-time processing.', 'https://{region}.console.aws.amazon.com/firehose/home?region={region}'.format(region=region), 'icons/services/firehose.png'),
         ConsoleItem('machinelearning', 'Build Smart Applications Quickly and Easily', 'https://console.aws.amazon.com/machinelearning/home?region={region}'.format(region=region), 'icons/services/machinelearning.png'),
         ConsoleItem('quicksight', 'Fast, easy to use business analytics', 'https://quicksight.aws.amazon.com'.format(region=region), 'icons/services/quicksight.png'),
         ConsoleItem('iot', 'Connect Devices to the Cloud', 'https://{region}.console.aws.amazon.com/iot/home?region={region}'.format(region=region), 'icons/services/iot.png'),
@@ -332,6 +366,7 @@ def aws_console(query, wf, complete, region):
     wf.send_feedback()
 
 
+quicklook_baseurl = None
 
 @click.command()
 @click.option('--quicklook_port', envvar='WF_QUICKLOOK_PORT')
@@ -340,7 +375,6 @@ def aws_console(query, wf, complete, region):
 @ensure_profile
 @ensure_region
 def search(quicklook_port, query, wf, profile, region):
-    quicklook_baseurl = None
     if quicklook_port is not None:
         if not is_running('quicklook'):
             log.info('\n'.join('%s = %s' % (k, v) for k, v in os.environ.items()))
@@ -354,9 +388,8 @@ def search(quicklook_port, query, wf, profile, region):
         quicklook_baseurl = 'http://localhost:%s/quicklook' % quicklook_port
 
     terms, facets = parse_query(query)
-    find_ec2(wf, profile, region, terms, facets, quicklook_baseurl)
-    find_s3_bucket(wf, profile, region, terms, facets, quicklook_baseurl)
-    find_database(wf, profile, region, terms, facets, quicklook_baseurl)
+    for finder in finders:
+        finder.find(wf, profile, region, terms, facets, quicklook_baseurl)
 
     wf.send_feedback()
 
@@ -369,6 +402,10 @@ def main():
         },
         help_url='https://github.com/twang817/aws-alfred-workflow/blob/master/README.md',
     )
+
+    # hack to get currently selected profile into `aws >profile` description
+    # http://stackoverflow.com/a/10307738/1899385
+    list_profiles.__doc__ %= wf.settings['profile']
 
     if wf.update_available:
         @wf_commands.command('update')

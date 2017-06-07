@@ -8,13 +8,13 @@
     <table>
         <tr>
             <td>Creation Date:</td>
-            <td>{{ bucket.CreationDate }}</td>
+            <td>{{ s3.CreationDate }}</td>
         </tr>
         <tr>
             <td>Tags:</td>
             <td>
                 <dl>
-                    {% for tag in bucket.TagSet %}
+                    {% for tag in s3.TagSet %}
                     <dt>{{ tag.Key }}</dt>
                     <dd>{{ tag.Value }}</dd>
                     {% endfor %}
@@ -22,6 +22,5 @@
             </td>
         </tr>
     </table>
-    {{ foo }}
 </body>
 </html>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import logging
 import os
@@ -6,15 +7,17 @@ from six.moves.urllib.parse import urlencode
 
 import workflow
 from workflow.background import run_in_background, is_running
+from workflow import MATCH_ALL, MATCH_ALLCHARS
 
 from .utils import json_serializer
 from .utils import filter_facets
+from .utils import create_stack_status_icons
 
 
 log = logging.getLogger()
 
 
-def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
+def _get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
     data_name = '%s-%s-%s' % (profile, region, name)
     data = wf.cached_data(data_name, max_age=0)
 
@@ -34,50 +37,93 @@ def get_cached_data(wf, profile, region, name, cmdline=None, max_age=60):
     return data
 
 
-def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    instances = get_cached_data(
-        wf, profile, region_name, 'ec2',
-        max_age=600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
-            'get_ec2_instances',
-        ])
+class Finder:
+    item_identifier = None
+    pretty_name = None
+    aws_list_function_name = None
 
-    if not instances:
-        return
+    def create_title(self, obj):
+        raise NotImplementedError
 
-    if len(terms) == 1 and terms[0].startswith('i-'):
-        instances = wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
-    elif len(terms) > 0:
-        instances = wf.filter(' '.join(terms), instances, key=lambda i: i['facets'].get('name', u''))
-    instances = filter_facets(wf, instances, facets)
+    def filter_items(self, wf, objects, terms):
+        raise NotImplementedError
 
-    for instance in instances:
+    def populate_menu_item(self, wf, obj, title, uid, region_name, quicklookurl):
+        raise NotImplementedError
+
+    def find(self, wf, profile, region_name, terms, facets, quicklook_baseurl):
+        objects = _get_cached_data(
+            wf, profile, region_name, self.item_identifier,
+            max_age=3600,
+            cmdline=[
+                '/usr/bin/env',
+                'python',
+                wf.workflowfile('aws.py'),
+                'background',
+                self.aws_list_function_name,
+            ])
+
+        if not objects:
+            return
+
+        if terms:
+            objects = self.filter_items(wf, objects, terms)
+        objects = filter_facets(wf, objects, facets)
+
+        for obj in objects:
+            title = self.create_title(obj)
+            uid = '%s-%s-%s' % (profile, self.item_identifier, title)
+            if quicklook_baseurl is not None:
+                quicklookurl = '%s/%s?%s' % (quicklook_baseurl, self.item_identifier, urlencode({
+                    'template': self.item_identifier,
+                    'context': json.dumps({
+                        'title': title,
+                        'uid': uid,
+                        self.item_identifier: obj,
+                    }, default=json_serializer)
+                }))
+            else:
+                quicklookurl = None
+
+            self.populate_menu_item(wf, obj, title, uid, region_name, quicklookurl, profile)
+
+
+class Ec2Finder(Finder):
+    item_identifier = 'ec2'
+    pretty_name = 'EC2 Instance'
+    aws_list_function_name = 'get_ec2_instances'
+
+    def create_title(self, instance):
         if 'Tag:Name' in instance:
-            title = '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
-        else:
-            title = instance['InstanceId']
-        uid = '%s-ec2-%s' % (profile, instance['InstanceId'])
-        valid = instance['State']['Name'] == 'running'
-        if quicklook_baseurl is not None:
-            quicklookurl = '%s/ec2?%s' % (quicklook_baseurl, urlencode({
-                'template': 'ec2',
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
-                    'instance': instance,
-                }, default=json_serializer)
-            }))
-        else:
-            quicklookurl = None
+            return '%s (%s)' % (instance['Tag:Name'], instance['InstanceId'])
+        return instance['InstanceId']
 
+    def filter_items(self, wf, instances, terms):
+        if len(terms) == 1 and terms[0].startswith('i-'):
+            return wf.filter(terms[0], instances, key=lambda i: unicode(i['InstanceId']), match_on=workflow.MATCH_STARTSWITH)
+        elif len(terms) > 0:
+            return wf.filter(' '.join(terms), instances, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda i: i['facets'].get('name', u''))
+        return instances
+
+    state_icons = {
+        'pending': '⏲',
+        'rebooting': '⏲',
+        'running': '🍏',
+        'stopping': '💣',
+        'stopped': '🔴',
+        'terminated': '🔴',
+        'shutting-down': '💣',
+    }
+
+    def populate_menu_item(self, wf, instance, title, uid, region_name, quicklookurl, profile):
+        state = instance['State']['Name']
+        valid = state == 'running'
+        state_icon = self.state_icons.get(state, '❔')
+        private_ip = instance.get('PrivateIpAddress', 'N/A')
         item = wf.add_item(
             title,
-            subtitle='private ip',
-            arg=instance.get('PrivateIpAddress', 'N/A'),
+            subtitle='copy private ip - %s (status: %s %s)' % (private_ip, state, state_icon),
+            arg=private_ip,
             valid=valid and 'PrivateIpAddress' in instance,
             uid=uid,
             icon='icons/ec2_instance.png',
@@ -85,15 +131,18 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'copy-to-clipboard,post-notification')
-        item.setvar('notification_text', 'Copied private IP (%s) of %s.' % (instance.get('PrivateIpAddress', 'N/A'), title))
+        item.setvar('notification_title', 'Copied Private IP of EC2 Instance')
+        item.setvar('notification_text', '%s of %s' % (private_ip, title))
+        public_ip = instance.get('PublicIpAddress', 'N/A')
         altmod = item.add_modifier(
             "alt",
-            subtitle='public ip',
-            arg=instance.get('PublicIpAddress', 'N/A'),
+            subtitle='copy public ip - ' + public_ip,
+            arg=public_ip,
             valid=valid and 'PublicIpAddress' in instance,
         )
         altmod.setvar('action', 'copy-to-clipboard,post-notification')
-        altmod.setvar('notification_text', 'Copied public IP (%s) of %s.' % (instance.get('PublicIpAddress', 'N/A'), title))
+        altmod.setvar('notification_title', 'Copied Public IP of EC2 Instance')
+        altmod.setvar('notification_text', '%s of %s' % (public_ip, title))
         cmdmod = item.add_modifier(
             "cmd",
             subtitle='open in console',
@@ -103,40 +152,18 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
         cmdmod.setvar('action', 'open-url')
 
 
-def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    buckets = get_cached_data(
-        wf, profile, region_name, 's3',
-        max_age=3600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
-            'get_s3_buckets',
-        ])
+class BucketFinder(Finder):
+    item_identifier = 's3'
+    pretty_name = 'S3 Bucket'
+    aws_list_function_name = 'get_s3_buckets'
 
-    if not buckets:
-        return
+    def create_title(self, bucket):
+        return bucket['Name']
 
-    if terms:
-        buckets = wf.filter(' '.join(terms), buckets, key=lambda b: unicode(b['Name']))
-    buckets = filter_facets(wf, buckets, facets)
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['Name']))
 
-    for bucket in buckets:
-        title = bucket['Name']
-        uid = '%s-bucket-%s' % (profile, title)
-        if quicklook_baseurl is not None:
-            quicklookurl = '%s/s3?%s' % (quicklook_baseurl, urlencode({
-                'template': 's3',
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
-                    'bucket': bucket,
-                }, default=json_serializer)
-            }))
-        else:
-            quicklookurl = None
-
+    def populate_menu_item(self, wf, bucket, title, uid, region_name, quicklookurl, profile):
         item = wf.add_item(
             title,
             subtitle='open in AWS console',
@@ -150,50 +177,290 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
         item.setvar('action', 'open-url')
 
 
-def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
-    dbs = get_cached_data(
-        wf, profile, region_name, 'rds',
-        max_age=3600,
-        cmdline=[
-            '/usr/bin/env',
-            'python',
-            wf.workflowfile('aws.py'),
-            'background',
-            'get_rds_instances',
-        ])
+class DatabaseFinder(Finder):
+    item_identifier = 'rds'
+    pretty_name = 'RDS Database'
+    aws_list_function_name = 'get_rds_instances'
 
-    if not dbs:
-        return
+    def create_title(self, db):
+        return db['facets']['name']
 
-    if terms:
-        dbs = wf.filter(' '.join(terms), dbs, key=lambda b: unicode(b['facets']['name']))
-    dbs = filter_facets(wf, dbs, facets)
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda b: unicode(b['facets']['name']))
 
-    for db in dbs:
-        title = db['facets']['name']
-        uid = '%s-db-%s' % (profile, title)
-        if quicklook_baseurl is not None:
-            quicklookurl = '%s/rds?%s' % (quicklook_baseurl, urlencode({
-                'template': 'rds',
-                'context': json.dumps({
-                    'title': title,
-                    'uid': uid,
-                    'db': db,
-                }, default=json_serializer)
-            }))
+    def populate_menu_item(self, wf, db, title, uid, region_name, quicklookurl, profile):
+        if db['type'] == 'instance':
+            db_id = db['DBInstanceIdentifier']
+            icon = 'icons/db_instance.png'
+            url = 'https://%s.console.aws.amazon.com/rds/home?region=%s#dbinstances:id=%s;sf=all' % (region_name, region_name, db_id)
         else:
-            quicklookurl = None
-
+            icon = 'icons/db_cluster.png'
+            url = 'https://%s.console.aws.amazon.com/rds/home?region=%s#dbclusters:' % (region_name, region_name)
 
         item = wf.add_item(
             title,
-            subtitle='copy endpoint url',
+            subtitle='copy endpoint url (%s)' % db['type'],
             arg=title,
             valid=True,
             uid=uid,
-            icon='icons/db_instance.png',
+            icon=icon,
             type='default',
             quicklookurl=quicklookurl
         )
         item.setvar('action', 'copy-to-clipboard,post-notification')
-        item.setvar('notification_text', 'Copied endpoint: %s.' % (title))
+        item.setvar('notification_title', 'Copied database endpoint')
+        item.setvar('notification_text', title)
+
+        cmdmod = item.add_modifier(
+            "cmd",
+            subtitle='open in AWS console',
+            arg=url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'open-url')
+
+
+class StackFinder(Finder):
+    item_identifier = 'cfn'
+    pretty_name = 'CloudFormation Stack'
+    aws_list_function_name = 'get_cfn_stacks'
+
+    stack_status_icons = create_stack_status_icons()
+
+    def create_title(self, stack):
+        return stack['StackName']
+
+    def filter_items(self, wf, stacks, terms):
+        return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['StackName']))
+
+    def populate_menu_item(self, wf, stack, title, uid, region_name, quicklookurl, profile):
+        url = 'https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stack/detail?stackId=%s' % (region_name, region_name, stack['StackId'])
+
+        status = stack['StackStatus']
+        stack_status_icon = self.stack_status_icons.get(status, '')
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s %s)' % (status, stack_status_icon),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/cfn_stack.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+
+class QueueFinder(Finder):
+    item_identifier = 'sqs'
+    pretty_name = 'SQS Queue'
+    aws_list_function_name = 'get_sqs_queues'
+
+    def create_title(self, queue):
+        return queue['QueueName']
+
+    def filter_items(self, wf, stacks, terms):
+        return wf.filter(' '.join(terms), stacks, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda stack: unicode(stack['QueueUrl']))
+
+    def populate_menu_item(self, wf, queue, title, uid, region_name, quicklookurl, profile):
+        queue_url = queue['QueueUrl']
+        # aws console doesn't use the actual queue url attribute for its query parameters, so manually construct it
+        formatted_queue_url = 'https://sqs.%s.amazonaws.com%s' % (region_name, queue_url.split('amazonaws.com')[-1])
+        url = 'https://console.aws.amazon.com/sqs/home?region=%s#queue-browser:selected=%s;prefix=' % (region_name, formatted_queue_url)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (messages available: %s; in-flight: %s)' % (queue['ApproximateNumberOfMessages'], queue['ApproximateNumberOfMessagesNotVisible']),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/sqs_queue.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        cmdmod = item.add_modifier(
+            "cmd",
+            subtitle='copy queue url',
+            arg=queue_url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied queue URL')
+        cmdmod.setvar('notification_text', queue_url)
+
+
+class RedshiftClusterFinder(Finder):
+    item_identifier = 'redshift'
+    pretty_name = 'Redshift Cluster'
+    aws_list_function_name = 'get_redshift_clusters'
+
+    def create_title(self, item):
+        return item['ClusterIdentifier']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['ClusterIdentifier']))
+
+    def populate_menu_item(self, wf, cluster, title, uid, region_name, quicklookurl, profile):
+        url = 'https://%s.console.aws.amazon.com/redshift/home?region=%s#cluster-details:cluster=%s' % (region_name, region_name, title)
+        del cluster['ClusterCreateTime'] # TODO
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s)' % cluster['ClusterStatus'],
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/redshift.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        first_node = next(iter(cluster['ClusterNodes']), None)
+
+        private_ip = first_node.get('PrivateIPAddress', 'N/A')
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='copy first node\'s private IP - %s' % private_ip,
+            arg=private_ip,
+            valid=first_node and 'PrivateIPAddress' in first_node,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied Private IP of Redshift Node')
+        cmdmod.setvar('notification_text', '%s of %s' % (private_ip, title))
+
+        public_ip = first_node.get('PublicIPAddress', 'N/A')
+        altmod = item.add_modifier(
+            'alt',
+            subtitle='copy first node\'s public IP - %s' % public_ip,
+            arg=public_ip,
+            valid=first_node and 'PublicIPAddress' in first_node,
+        )
+        altmod.setvar('action', 'copy-to-clipboard,post-notification')
+        altmod.setvar('notification_title', 'Copied Public IP of Redshift Node')
+        altmod.setvar('notification_text', '%s of %s' % (public_ip, title))
+
+
+class FunctionFinder(Finder):
+    item_identifier = 'lambda'
+    pretty_name = 'Lambda Function'
+    aws_list_function_name = 'get_lambda_functions'
+
+    def create_title(self, item):
+        return item['FunctionName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['FunctionName']))
+
+    def populate_menu_item(self, wf, function, title, uid, region_name, quicklookurl, profile):
+        url = 'https://%s.console.aws.amazon.com/lambda/home?region=%s#/functions/%s?tab=code' % (region_name, region_name, title)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (runtime: %s)' % function.get('Runtime', 'N/A'),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/lambda.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        cloudwatch_url = 'https://%s.console.aws.amazon.com/cloudwatch/home?region=%s#logStream:group=/aws/lambda/%s;streamFilter=typeLogStreamPrefix' % (region_name, region_name, title)
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='open cloudwatch log group',
+            arg=cloudwatch_url,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'open-url')
+
+
+class EnvironmentFinder(Finder):
+    item_identifier = 'eb'
+    pretty_name = 'ElasticBeanstalk Environment'
+    aws_list_function_name = 'get_beanstalk_environments'
+
+    def create_title(self, item):
+        return item['EnvironmentName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['EnvironmentName']))
+
+    health_icons = {
+        'Green': u'🍏',
+        'Yellow': u'🌕',
+        'Red': u'🔴',
+        'Grey': u'⚫',
+    }
+
+    def populate_menu_item(self, wf, env, title, uid, region_name, quicklookurl, profile):
+        url = 'https://%s.console.aws.amazon.com/elasticbeanstalk/home?region=%s#/environment/dashboard?applicationName=%s&environmentId=%s' % (region_name, region_name, env['ApplicationName'], env['EnvironmentId'])
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console (status: %s; health: %s %s)' % (env.get('Status'), env.get('HealthStatus'), self.health_icons.get(env.get('Health'))),
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/eb_environment.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        load_balancer_url = env.get('EndpointURL', 'N/A')
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='copy load balancer url - %s' % load_balancer_url,
+            arg=load_balancer_url,
+            valid='EndpointURL' in env,
+        )
+        cmdmod.setvar('action', 'copy-to-clipboard,post-notification')
+        cmdmod.setvar('notification_title', 'Copied Load Balancer URL')
+        cmdmod.setvar('notification_text', load_balancer_url)
+
+
+class LogGroupFinder(Finder):
+    item_identifier = 'logs'
+    pretty_name = 'CloudWatch Log Group'
+    aws_list_function_name = 'get_cloudwatch_log_groups'
+
+    def create_title(self, item):
+        return item['logGroupName']
+
+    def filter_items(self, wf, items, terms):
+        return wf.filter(' '.join(terms), items, match_on=MATCH_ALL ^ MATCH_ALLCHARS, key=lambda item: unicode(item['logGroupName']))
+
+    def populate_menu_item(self, wf, group, title, uid, region_name, quicklookurl, profile):
+        group_name = self.create_title(group)
+        url = 'https://%s.console.aws.amazon.com/cloudwatch/home?region=%s#logEventViewer:group=%s;start=P1D' % (region_name, region_name, group_name)
+        item = wf.add_item(
+            title,
+            subtitle='open in AWS console',
+            arg=url,
+            valid=True,
+            uid=uid,
+            icon='icons/services/cloudwatch.png',
+            type='default',
+            quicklookurl=quicklookurl
+        )
+        item.setvar('action', 'open-url')
+
+        awslogs_command = 'awslogs get %s -w --aws_region %s --profile %s' % (group_name, region_name, profile)
+        cmdmod = item.add_modifier(
+            'cmd',
+            subtitle='execute `awslogs` tail command in terminal',
+            arg=awslogs_command,
+            valid=True,
+        )
+        cmdmod.setvar('action', 'execute-terminal')
+
+        altmod = item.add_modifier(
+            'alt',
+            subtitle='copy `awslogs` tail command to clipboard',
+            arg=awslogs_command,
+            valid=True,
+        )
+        altmod.setvar('action', 'copy-to-clipboard,post-notification')
+        altmod.setvar('notification_title', 'Copied `awslogs` Command')
+        altmod.setvar('notification_text', awslogs_command)

@@ -6,7 +6,7 @@ states = (
     ('squoted', 'exclusive'),
 )
 tokens = 'STRING'.split()
-literals = ['"', "'", '>', '+']
+literals = ['"', "'", '>', '+', '@']
 
 def t_empty_quotes(t):
     r"''|\"\""
@@ -35,7 +35,7 @@ def t_dquoted_end(t):
     t.lexer.pop_state()
 
 def t_STRING(t):
-    r"[a-zA-Z_-]+"
+    r"[a-zA-Z0-9_-]+"
     return t
 
 t_ignore = ' \t'

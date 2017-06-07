@@ -101,3 +101,119 @@ def get_rds_instances():
             finally:
                 dbs.append(db)
     return dbs
+
+
+def get_cfn_stacks():
+    client = boto3.client('cloudformation')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling describe_stacks')
+        response = client.describe_stacks(**next_token)
+        for item in response['Stacks']:
+            item['facets'] = {}
+            item['facets']['name'] = item['StackName']
+            if 'Tags' in item:
+                for tag in item['Tags']:
+                    item['Tag:%s' % tag['Key']] = tag['Value']
+                    item['facets'][tag['Key'].lower()] = tag['Value']
+            items.append(item)
+        if 'NextToken' in response:
+            next_token['NextToken'] = response['NextToken']
+        else:
+            break
+    return items
+
+
+def get_sqs_queues():
+    client = boto3.client('sqs')
+    queues = []
+    response = client.list_queues()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(client.get_queue_attributes, QueueUrl=queue_url, AttributeNames=['All']): queue_url for queue_url in response['QueueUrls']}
+        for future in concurrent.futures.as_completed(futures):
+            queue_url = futures[future]
+            queue = {
+                'QueueUrl': queue_url,
+            }
+            try:
+                attributes = future.result()
+            except botocore.exceptions.ClientError as e:
+                log.error(e)
+            else:
+                for key, attribute in list(attributes['Attributes'].items()):
+                    queue[key] = attribute
+                queue['QueueName'] = queue['QueueArn'].split(':')[-1]
+            finally:
+                queues.append(queue)
+    return queues
+
+
+def get_redshift_clusters():
+    client = boto3.client('redshift')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling describe_clusters')
+        response = client.describe_clusters(**next_token)
+        for item in response['Clusters']:
+            item['facets'] = {}
+            item['facets']['name'] = item['DBName']
+            if 'Tags' in item:
+                for tag in item['Tags']:
+                    item['Tag:%s' % tag['Key']] = tag['Value']
+                    item['facets'][tag['Key'].lower()] = tag['Value']
+            items.append(item)
+        if 'Marker' in response:
+            next_token['NextToken'] = response['Marker']
+        else:
+            break
+    return items
+
+
+def get_lambda_functions():
+    client = boto3.client('lambda')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling list_functions')
+        response = client.list_functions(**next_token)
+        for item in response['Functions']:
+            item['facets'] = {}
+            item['facets']['name'] = item['FunctionName']
+            items.append(item)
+        if 'NextMarker' in response:
+            next_token['NextToken'] = response['NextMarker']
+        else:
+            break
+    return items
+
+
+def get_beanstalk_environments():
+    client = boto3.client('elasticbeanstalk')
+    items = []
+    log.debug('calling describe_environments')
+    response = client.describe_environments()
+    for item in response['Environments']:
+        item['facets'] = {}
+        item['facets']['name'] = item['EnvironmentName']
+        items.append(item)
+    return items
+
+
+def get_cloudwatch_log_groups():
+    client = boto3.client('logs')
+    next_token = {}
+    items = []
+    while True:
+        log.debug('calling cloudwatch_streams')
+        response = client.describe_log_groups(**next_token)
+        for item in response['logGroups']:
+            item['facets'] = {}
+            item['facets']['name'] = item['logGroupName']
+            items.append(item)
+        if 'nextToken' in response:
+            next_token['nextToken'] = response['nextToken']
+        else:
+            break
+    return items

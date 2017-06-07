@@ -21,6 +21,19 @@
 				<false/>
 			</dict>
 		</array>
+		<key>76C5B220-7C6A-45F7-AFD9-12AA7EDFD839</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>F51858AD-13C1-46B3-A32A-03FF8DEB45AE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>7A0B639E-7E89-4443-8D59-6E486E864315</key>
 		<array>
 			<dict>
@@ -82,6 +95,16 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>54DA4351-2300-40EA-B70F-3CFFE50624B3</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>76C5B220-7C6A-45F7-AFD9-12AA7EDFD839</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -215,15 +238,15 @@
 				<key>keyword</key>
 				<string>aws</string>
 				<key>queuedelaycustom</key>
-				<integer>3</integer>
+				<integer>1</integer>
 				<key>queuedelayimmediatelyinitially</key>
 				<true/>
 				<key>queuedelaymode</key>
-				<integer>0</integer>
+				<integer>2</integer>
 				<key>queuemode</key>
-				<integer>1</integer>
+				<integer>2</integer>
 				<key>runningsubtext</key>
-				<string></string>
+				<string>searching ...</string>
 				<key>script</key>
 				<string>python aws.py script-filter "{query}"</string>
 				<key>scriptargtype</key>
@@ -231,7 +254,7 @@
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
-				<string></string>
+				<string>AWS Alfred Workflow</string>
 				<key>title</key>
 				<string>Search AWS</string>
 				<key>type</key>
@@ -334,6 +357,40 @@
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>escaping</key>
+				<integer>0</integer>
+				<key>script</key>
+				<string>{query}</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.terminalcommand</string>
+			<key>uid</key>
+			<string>F51858AD-13C1-46B3-A32A-03FF8DEB45AE</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>inputstring</key>
+				<string>{var:action}</string>
+				<key>matchcasesensitive</key>
+				<false/>
+				<key>matchmode</key>
+				<integer>2</integer>
+				<key>matchstring</key>
+				<string>\bexecute-terminal\b</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.filter</string>
+			<key>uid</key>
+			<string>76C5B220-7C6A-45F7-AFD9-12AA7EDFD839</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -359,6 +416,13 @@
 			<integer>420</integer>
 			<key>ypos</key>
 			<integer>460</integer>
+		</dict>
+		<key>76C5B220-7C6A-45F7-AFD9-12AA7EDFD839</key>
+		<dict>
+			<key>xpos</key>
+			<integer>420</integer>
+			<key>ypos</key>
+			<integer>590</integer>
 		</dict>
 		<key>7A0B639E-7E89-4443-8D59-6E486E864315</key>
 		<dict>
@@ -408,6 +472,13 @@
 			<integer>420</integer>
 			<key>ypos</key>
 			<integer>320</integer>
+		</dict>
+		<key>F51858AD-13C1-46B3-A32A-03FF8DEB45AE</key>
+		<dict>
+			<key>xpos</key>
+			<integer>520</integer>
+			<key>ypos</key>
+			<integer>560</integer>
 		</dict>
 	</dict>
 	<key>variables</key>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import logging
 import os
@@ -103,3 +104,38 @@ def autocomplete_group(wf, query, group, complete):
 def set_version(f):
     f.__doc__ = f.__doc__ % __version__
     return f
+
+
+def create_stack_status_icons():
+    """
+    Using statuses from
+    https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html#d0e12244
+
+    Note that, due to its dynamic nature, this function creates a couple of unused keys in the status icons dict
+    """
+    status_icons = {}
+
+    verbs = [
+        'CREATE',
+        'DELETE',
+        'REVIEW',
+        'UPDATE',
+        'ROLLBACK',
+        'UPDATE_ROLLBACK',
+    ]
+    states = {
+        'IN_PROGRESS': u'⏲',
+        'FAILED': u'❌',
+        'COMPLETE': u'✅',
+    }
+
+    for verb in verbs:
+        for key in states.keys():
+            status_icons['%s_%s' % (verb, key)] = states[key]
+
+    # custom statuses
+    status_icons['UPDATE_COMPLETE_CLEANUP_IN_PROGRESS'] \
+        = status_icons['UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS'] \
+        = states['IN_PROGRESS']
+
+    return status_icons

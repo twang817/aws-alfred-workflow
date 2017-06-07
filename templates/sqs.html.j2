@@ -1,0 +1,56 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table>
+        <tr>
+            <td>Queue ARN:</td>
+            <td>{{ sqs.QueueArn }}</td>
+        </tr>
+        <tr>
+            <td>Queue URL:</td>
+            <td>{{ sqs.QueueUrl }}</td>
+        </tr>
+        <tr>
+            <td>Created:</td>
+            <td>{{ sqs.CreatedTimestamp }}</td>
+        </tr>
+        <tr>
+            <td>Updated:</td>
+            <td>{{ sqs.LastModifiedTimestamp | default('N/A')}}</td>
+        </tr>
+        <tr>
+            <td>Messages (approximate):</td>
+            <td>{{ sqs.ApproximateNumberOfMessages }}</td>
+        </tr>
+        <tr>
+            <td>Messages Delayed (approximate):</td>
+            <td>{{ sqs.ApproximateNumberOfMessagesDelayed }}</td>
+        </tr>
+        <tr>
+            <td>Messages Not Visible (approximate):</td>
+            <td>{{ sqs.ApproximateNumberOfMessagesNotVisible }}</td>
+        </tr>
+        <tr>
+            <td>Receive Message Wait Time (in seconds):</td>
+            <td>{{ sqs.ReceiveMessageWaitTimeSeconds }}</td>
+        </tr>
+        <tr>
+            <td>Delay (in seconds)</td>
+            <td>{{ sqs.DelaySeconds }}</td>
+        </tr>
+        <tr>
+            <td>Message Retention Period:</td>
+            <td>{{ sqs.MessageRetentionPeriod }}</td>
+        </tr>
+        <tr>
+            <td>Maximum Message Size:</td>
+            <td>{{ sqs.MaximumMessageSize }}</td>
+        </tr>
+    </table>
+</body>
+</html>
+

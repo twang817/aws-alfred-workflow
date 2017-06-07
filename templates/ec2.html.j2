@@ -8,49 +8,49 @@
     <table>
         <tr>
             <td>State:</td>
-            <td>{{ instance.State.Name }}</td>
+            <td>{{ ec2.State.Name }}</td>
         </tr>
         <tr>
             <td>Instance Type:</td>
-            <td>{{ instance.InstanceType }}</td>
+            <td>{{ ec2.InstanceType }}</td>
         </tr>
         <tr>
             <td>Launch Time:</td>
-            <td>{{ instance.LaunchTime }}</td>
+            <td>{{ ec2.LaunchTime }}</td>
         </tr>
         <tr>
             <td>VPC ID:</td>
-            <td>{{ instance.VpcId }}</td>
+            <td>{{ ec2.VpcId }}</td>
         </tr>
         <tr>
             <td>Subnet ID:</td>
-            <td>{{ instance.SubnetId }}</td>
+            <td>{{ ec2.SubnetId }}</td>
         </tr>
         <tr>
             <td>Placement:</td>
-            <td>{{ instance.Placement.AvailabilityZone }}</td>
+            <td>{{ ec2.Placement.AvailabilityZone }}</td>
         </tr>
         <tr>
             <td>Private IP:</td>
-            <td>{{ instance.PrivateIpAddress }}</td>
+            <td>{{ ec2.PrivateIpAddress }}</td>
         </tr>
         <tr>
             <td>Private DNS:</td>
-            <td>{{ instance.PrivateDnsName }}</td>
+            <td>{{ ec2.PrivateDnsName }}</td>
         </tr>
         <tr>
             <td>Public IP:</td>
-            <td>{{ instance.PublicIpAddress }}</td>
+            <td>{{ ec2.PublicIpAddress }}</td>
         </tr>
         <tr>
             <td>Public DNS:</td>
-            <td>{{ instance.PublicDnsName }}</td>
+            <td>{{ ec2.PublicDnsName }}</td>
         </tr>
         <tr>
             <td>Tags:</td>
             <td>
                 <dl>
-                    {% for tag in instance.Tags %}
+                    {% for tag in ec2.Tags %}
                     <dt>{{ tag.Key }}</dt>
                     <dd>{{ tag.Value }}</dd>
                     {% endfor %}
@@ -58,6 +58,5 @@
             </td>
         </tr>
     </table>
-    {{ foo }}
 </body>
 </html>
