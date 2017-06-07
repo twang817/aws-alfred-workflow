@@ -55,7 +55,7 @@ def get_s3_buckets():
     return buckets
 
 
-def get_rds_instances():
+def get_rds_clusters():
     client = boto3.client('rds')
     dbs = []
     log.debug('calling describe-db-clusters')
@@ -64,7 +64,6 @@ def get_rds_instances():
         futures = {executor.submit(client.list_tags_for_resource, ResourceName=db['DBClusterArn']): db for db in response['DBClusters']}
         for future in concurrent.futures.as_completed(futures):
             db = futures[future]
-            db['type'] = 'cluster'
             db['facets'] = {}
             db['facets']['name'] = db['Endpoint']
             try:
@@ -79,13 +78,18 @@ def get_rds_instances():
                     db['facets'][tag['Key'].lower()] = tag['Value']
             finally:
                 dbs.append(db)
+    return dbs
 
+
+def get_rds_instances():
+    client = boto3.client('rds')
+    dbs = []
+    log.debug('calling describe-db-instances')
     response = client.describe_db_instances()
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(client.list_tags_for_resource, ResourceName=db['DBInstanceArn']): db for db in response['DBInstances'] if 'DBClusterIdentifier' not in db}
+        futures = {executor.submit(client.list_tags_for_resource, ResourceName=db['DBInstanceArn']): db for db in response['DBInstances']}
         for future in concurrent.futures.as_completed(futures):
             db = futures[future]
-            db['type'] = 'instance'
             db['facets'] = {}
             db['facets']['name'] = db['Endpoint']['Address']
             try:

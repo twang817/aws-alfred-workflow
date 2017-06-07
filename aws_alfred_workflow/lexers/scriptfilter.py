@@ -46,3 +46,39 @@ def t_ANY_error(t):
     t.lexer.skip(1)
 
 lexer = lex.lex()
+
+# def p_result_workflow_command(p):
+#     "result : '>' command args"
+#     p[0] = (p[1], p[2], p[3])
+
+# def p_result_web_command(p):
+#     "result : '+' command args"
+#     p[0] = (p[1], p[2], p[3])
+
+# def p_command(p):
+#     "command : STRING"
+#     p[0] = p[1]
+
+# def p_args(p):
+#     "args :"
+#     p[0] = []
+
+# def p_args_append(p):
+#     "args : args STRING"
+#     p[1].append(p[2])
+#     p[0] = p[1]
+
+# def p_result_query(p):
+#     "result : query"
+#     p[0] = p[1]
+
+# def p_query(p):
+#     "query :"
+#     p[0] = []
+
+# def p_query_star(p):
+#     "query : query STRING"
+#     p[1].append(p[2])
+#     p[0] = p[1]
+
+# parser = yacc.yacc()

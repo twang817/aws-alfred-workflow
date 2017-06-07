@@ -4,11 +4,30 @@ import os
 
 import boto3
 import click
+import workflow
 
 from .version import __version__
 
 
 log = logging.getLogger()
+
+
+def setup_logger(wf):
+    fmt = logging.Formatter('%(asctime)s %(filename)s:%(lineno)s %(levelname)-8s %(message)s', datefmt='%H:%M:%S')
+    logfile = logging.handlers.RotatingFileHandler(
+        wf.cachefile('%s.log' % wf.bundleid),
+        maxBytes=1024 * 1024,
+        backupCount=1)
+    logfile.setFormatter(fmt)
+    log.addHandler(logfile)
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+    log.addHandler(console)
+    if wf.debugging:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
+
 
 def json_serializer(obj):
     if isinstance(obj, datetime.datetime):
@@ -28,7 +47,7 @@ def parse_query(query):
     terms, facets = [], {}
     log.debug('parsing query %s' % query)
     if query:
-        from .qlex import parser
+        from lexers.query import parser
         terms, facets = parser.parse(query)
     log.debug('terms: %s', terms)
     log.debug('facets: %s', facets)
@@ -68,6 +87,21 @@ def make_pass_decorator(key, ensure=False, factory=lambda: None):
     return decorator
 
 
+_default_command = None
+
+
+def default_command(cmd):
+    global _default_command
+    _default_command = cmd
+    return cmd
+
+
+def get_default_command():
+    if _default_command is None:
+        raise Exception('Misconfigured, no default command')
+    return _default_command
+
+
 def get_profile():
     ctx = click.get_current_context()
     ctx = find_context(ctx, 'wf')
@@ -87,10 +121,10 @@ def get_region():
     return region
 
 
-def autocomplete_group(wf, query, group, complete):
+def autocomplete_group(wf, query, group, complete, match=None):
     items = group.commands.keys()
     if query:
-        items = wf.filter(query, items)
+        items = wf.filter(query, items, match_on=match or workflow.MATCH_STARTSWITH)
     for item in items:
         wf.add_item(title=item,
                     subtitle=group.commands[item].__doc__ or '',

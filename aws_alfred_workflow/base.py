@@ -63,8 +63,7 @@ def find_ec2(wf, profile, region_name, terms, facets, quicklook_baseurl):
         uid = '%s-ec2-%s' % (profile, instance['InstanceId'])
         valid = instance['State']['Name'] == 'running'
         if quicklook_baseurl is not None:
-            quicklookurl = '%s/ec2?%s' % (quicklook_baseurl, urlencode({
-                'template': 'ec2',
+            quicklookurl = '%s/ec2_instance?%s' % (quicklook_baseurl, urlencode({
                 'context': json.dumps({
                     'title': title,
                     'uid': uid,
@@ -126,8 +125,7 @@ def find_s3_bucket(wf, profile, region_name, terms, facets, quicklook_baseurl):
         title = bucket['Name']
         uid = '%s-bucket-%s' % (profile, title)
         if quicklook_baseurl is not None:
-            quicklookurl = '%s/s3?%s' % (quicklook_baseurl, urlencode({
-                'template': 's3',
+            quicklookurl = '%s/s3_bucket?%s' % (quicklook_baseurl, urlencode({
                 'context': json.dumps({
                     'title': title,
                     'uid': uid,
@@ -173,8 +171,7 @@ def find_database(wf, profile, region_name, terms, facets, quicklook_baseurl):
         title = db['facets']['name']
         uid = '%s-db-%s' % (profile, title)
         if quicklook_baseurl is not None:
-            quicklookurl = '%s/rds?%s' % (quicklook_baseurl, urlencode({
-                'template': 'rds',
+            quicklookurl = '%s/rds_instance?%s' % (quicklook_baseurl, urlencode({
                 'context': json.dumps({
                     'title': title,
                     'uid': uid,
