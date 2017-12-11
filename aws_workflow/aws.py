@@ -14,7 +14,10 @@ def get_ec2_instances():
     instances = []
     while True:
         log.debug('calling describe_instances')
-        response = client.describe_instances(MaxResults=1000, **next_token)
+        response = client.describe_instances(MaxResults=1000, Filters=[{
+            'Name': 'instance-state-name',
+            'Values': ['running'],
+            }], **next_token)
         for reservation in response['Reservations']:
             for instance in reservation['Instances']:
                 instance['facets'] = {}
