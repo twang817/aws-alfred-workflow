@@ -1,5 +1,5 @@
 Jinja2==2.8
-Alfred-Workflow==1.26
+Alfred-Workflow==1.28.1
 boto3==1.4.2
 click==6.6
 tornado==4.4.2
