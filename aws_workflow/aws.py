@@ -8,6 +8,11 @@ import concurrent.futures
 log = logging.getLogger()
 
 
+def get_profiles():
+    session = boto3.session.Session()
+    return session.available_profiles
+
+
 def get_ec2_instances():
     client = boto3.client('ec2')
     next_token = {}

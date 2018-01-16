@@ -203,10 +203,7 @@ for finder in finders:
 @pass_complete
 def list_profiles(query, wf, complete):
     '''set the active profile (currently active: %s)'''  # %s will later get hacked to __doc__ in main()
-    from six.moves import configparser
-    parser = configparser.ConfigParser()
-    parser.read(os.path.expanduser('~/.aws/credentials'))
-    profiles = parser.sections()
+    profiles = aws.get_profiles()
     if query:
         profiles = wf.filter(query, profiles)
     for profile in profiles:
